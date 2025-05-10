@@ -105,7 +105,9 @@ class TransformationCodeGenerator:
         )
         return extract_code(response.code)
 
-    def review_transformation_code(self, transformation_code: str, problem_statement: str, plan: str, problems: str = None) -> str:
+    def review_transformation_code(
+        self, transformation_code: str, problem_statement: str, plan: str, problems: str = None
+    ) -> str:
         """
         Reviews the transformation code to identify improvements and fix issues.
 
@@ -129,8 +131,12 @@ class TransformationCodeGenerator:
     def generate_transformation_tests(self, problem_statement: str, plan: str, transformation_code: str) -> str:
         raise NotImplementedError("Generation of the transformation tests is not yet implemented.")
 
-    def fix_transformation_tests(self, transformation_tests: str, transformation_code: str, review: str, problems: str = None) -> str:
+    def fix_transformation_tests(
+        self, transformation_tests: str, transformation_code: str, review: str, problems: str = None
+    ) -> str:
         raise NotImplementedError("Fixing of the transformation tests is not yet implemented.")
 
-    def review_transformation_tests(self, transformation_tests: str, transformation_code: str, problem_statement: str, plan: str) -> str:
+    def review_transformation_tests(
+        self, transformation_tests: str, transformation_code: str, problem_statement: str, plan: str
+    ) -> str:
         raise NotImplementedError("Review of the transformation tests is not yet implemented.")

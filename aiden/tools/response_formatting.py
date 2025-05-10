@@ -2,7 +2,7 @@
 This module provides tools for forcing an agent to return its response in a specific format.
 """
 
-from typing import Dict, List, Optional
+from typing import Optional
 
 from smolagents import tool
 
@@ -12,7 +12,6 @@ def format_final_manager_agent_response(
     task_description: str,
     solution_plan: str,
     transformation_code_id: str,
-
 ) -> dict:
     """
     Returns a dictionary containing the exact fields that the agent must return in its final response. The purpose

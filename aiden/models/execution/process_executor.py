@@ -144,7 +144,9 @@ class ProcessExecutor(Executor):
             return ExecutionResult(
                 term_out=[],
                 exec_time=self.timeout,
-                exception=TimeoutError(f"Execution exceeded {self.timeout}s timeout - individual run timeout limit reached"),
+                exception=TimeoutError(
+                    f"Execution exceeded {self.timeout}s timeout - individual run timeout limit reached"
+                ),
             )
         except Exception as e:
             stdout, stderr = "", ""

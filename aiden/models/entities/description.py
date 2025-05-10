@@ -7,12 +7,10 @@ metrics, and source code, organized in a structured format suitable
 for various output formats and visualization purposes.
 """
 
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 from dataclasses_json import DataClassJsonMixin
-
-from aiden.tools import transformation
 
 
 @dataclass

@@ -225,7 +225,7 @@ class _PromptTemplates:
             validation_data_files=validation_data_files,
             use_validation_files=len(validation_data_files) > 0,
         )
-    
+
     def transformation_system(self) -> str:
         return self._render("transformation/system_prompt.jinja")
 
@@ -241,9 +241,7 @@ class _PromptTemplates:
             allowed_packages=allowed_packages,
         )
 
-    def transformation_fix(
-        self, transformation_code, plan, review, problems, allowed_packages
-    ) -> str:
+    def transformation_fix(self, transformation_code, plan, review, problems, allowed_packages) -> str:
         return self._render(
             "transformation/fix.jinja",
             transformation_code=transformation_code,

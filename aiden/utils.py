@@ -19,9 +19,9 @@ def get_prompt_templates(base_template_name: str, override_template_name: str) -
         importlib.resources.files("smolagents.prompts").joinpath(base_template_name).read_text()
     )
     override_template: dict = yaml.safe_load(
-        str(importlib.resources.files("aiden").joinpath("prompts").joinpath(override_template_name).read_text()).replace(
-            "{{allowed_packages}}", str(config.code_generation.allowed_packages)
-        )
+        str(
+            importlib.resources.files("aiden").joinpath("prompts").joinpath(override_template_name).read_text()
+        ).replace("{{allowed_packages}}", str(config.code_generation.allowed_packages))
     )
     # print(base_template["managed_agent"]["task"])
     # print(override_template["managed_agent"]["task"])

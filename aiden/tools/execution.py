@@ -12,7 +12,6 @@ from typing import Callable, Dict, List, Type
 from pandas import DataFrame
 from smolagents import tool
 
-from aiden.common.datasets.interface import TabularConvertible
 from aiden.common.registries.objects import ObjectRegistry
 from aiden.models.entities.code import Code
 from aiden.models.entities.node import Node
