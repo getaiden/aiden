@@ -185,3 +185,4 @@ trash/
 
 #gradio
 .gradio/
+.ruff_cache/
