@@ -11,13 +11,13 @@ Aiden is a Python framework that enables you to build data transformations using
 You can install Aiden using pip:
 
 ```bash
-pip install aiden
+pip install aiden-ai
 ```
 
 Or using Poetry:
 
 ```bash
-poetry add aiden
+poetry add aiden-ai
 ```
 
 For development installation:

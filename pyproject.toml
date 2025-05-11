@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "aiden"
+name = "aiden-ai"
 version = "0.1.1"
 description = "An agentic framework for building Data transformations from natural language"
 authors = ["hamza sefiane <h.sefiane7@gmail.com>"]
