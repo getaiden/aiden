@@ -221,14 +221,14 @@ trio = ["trio (>=0.26.1)"]
 
 [[package]]
 name = "arize-phoenix"
-version = "9.0.0"
+version = "9.0.1"
 description = "AI Observability and Evaluation"
 optional = false
 python-versions = "<3.14,>=3.9"
 groups = ["main"]
 files = [
-    {file = "arize_phoenix-9.0.0-py3-none-any.whl", hash = "sha256:2ffce67c3629a8c12360df895ce131954ae79f0f5fe66979001af152ac1cf315"},
-    {file = "arize_phoenix-9.0.0.tar.gz", hash = "sha256:fd5ec2d6da2038559104a1d07193ffccd16de03282a17709f202e70c48849025"},
+    {file = "arize_phoenix-9.0.1-py3-none-any.whl", hash = "sha256:1039df72912ff11204e179464087a67b09074dfa0d1dca7530e081b377be8e87"},
+    {file = "arize_phoenix-9.0.1.tar.gz", hash = "sha256:5184d802fa15602b5c9baa19a9f29477e3e85f15a89046b896ece3ea58d1a643"},
 ]
 
 [package.dependencies]
@@ -264,15 +264,15 @@ scipy = "*"
 sqlalchemy = {version = ">=2.0.4,<3", extras = ["asyncio"]}
 sqlean-py = ">=3.45.1"
 starlette = ">=0.46.0"
-strawberry-graphql = ">=0.262.0"
+strawberry-graphql = "0.267.0"
 tqdm = "*"
 typing-extensions = ">=4.6"
 uvicorn = "*"
 wrapt = ">=1.17.2"
 
 [package.extras]
-container = ["aiohttp", "anthropic (>=0.49.0)", "azure-identity", "fast-hdbscan (>=0.2.0)", "google-generativeai", "numba (>=0.60.0)", "openai (>=1.0.0)", "opentelemetry-exporter-otlp", "opentelemetry-instrumentation-fastapi", "opentelemetry-instrumentation-grpc", "opentelemetry-instrumentation-sqlalchemy", "opentelemetry-proto (>=1.12.0)", "opentelemetry-sdk", "opentelemetry-semantic-conventions", "prometheus-client", "py-grpc-prometheus", "strawberry-graphql[opentelemetry] (==0.262.5)", "umap-learn", "uvloop ; platform_system != \"Windows\""]
-dev = ["anthropic (>=0.49.0)", "arize[autoembeddings,llm-evaluation]", "asgi-lifespan", "asyncpg", "faker (>=30.1.0)", "gcsfs", "google-cloud-aiplatform (>=1.3)", "grpc-interceptor[testing]", "hatch", "jupyter", "langchain (>=0.0.334)", "litellm (>=1.0.3,<1.57.5)", "llama-index (>=0.10.3)", "mypy (==1.12.1)", "nbqa", "pandas (>=1.0)", "pandas-stubs (==2.2.2.240603)", "portpicker", "pre-commit", "prometheus-client", "psycopg[binary,pool]", "pytest (==8.3.3)", "pytest-asyncio", "pytest-cov", "pytest-postgresql", "pytest-xdist", "ruff (==0.6.9)", "strawberry-graphql[debug-server,opentelemetry] (==0.262.5)", "tabulate", "tox (==4.18.1)", "tox-uv (==1.11.3)", "types-jsonschema", "types-tabulate", "uv (==0.4.8)", "uvloop ; platform_system != \"Windows\""]
+container = ["aiohttp", "anthropic (>=0.49.0)", "azure-identity", "fast-hdbscan (>=0.2.0)", "google-generativeai", "numba (>=0.60.0)", "openai (>=1.0.0)", "opentelemetry-exporter-otlp", "opentelemetry-instrumentation-fastapi", "opentelemetry-instrumentation-grpc", "opentelemetry-instrumentation-sqlalchemy", "opentelemetry-proto (>=1.12.0)", "opentelemetry-sdk", "opentelemetry-semantic-conventions", "prometheus-client", "py-grpc-prometheus", "strawberry-graphql[opentelemetry] (==0.267.0)", "umap-learn", "uvloop ; platform_system != \"Windows\""]
+dev = ["anthropic (>=0.49.0)", "arize[autoembeddings,llm-evaluation]", "asgi-lifespan", "asyncpg", "faker (>=30.1.0)", "gcsfs", "google-cloud-aiplatform (>=1.3)", "grpc-interceptor[testing]", "hatch", "jupyter", "langchain (>=0.0.334)", "litellm (>=1.0.3,<1.57.5)", "llama-index (>=0.10.3)", "mypy (==1.12.1)", "nbqa", "pandas (>=1.0)", "pandas-stubs (==2.2.2.240603)", "portpicker", "pre-commit", "prometheus-client", "psycopg[binary,pool]", "pytest (==8.3.3)", "pytest-asyncio", "pytest-cov", "pytest-postgresql", "pytest-xdist", "ruff (==0.6.9)", "strawberry-graphql[debug-server,opentelemetry] (==0.267.0)", "tabulate", "tox (==4.18.1)", "tox-uv (==1.11.3)", "types-jsonschema", "types-tabulate", "uv (==0.4.8)", "uvloop ; platform_system != \"Windows\""]
 embeddings = ["fast-hdbscan (>=0.2.0)", "numba (>=0.60.0)", "umap-learn"]
 llama-index = ["llama-index (==0.11.0)", "llama-index-agent-openai (>=0.2.7)", "llama-index-embeddings-openai (>=0.1.10)", "llama-index-llms-openai (>=0.1.24)", "llama-index-readers-file (>=0.1.25)"]
 pg = ["asyncpg", "psycopg[binary,pool]"]
@@ -671,14 +671,14 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.1.8"
+version = "8.2.0"
 description = "Composable command line interface toolkit"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "click-8.1.8-py3-none-any.whl", hash = "sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2"},
-    {file = "click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a"},
+    {file = "click-8.2.0-py3-none-any.whl", hash = "sha256:6b303f0b2aa85f1cb4e5303078fadcbcd4e476f114fab9b5007005711839325c"},
+    {file = "click-8.2.0.tar.gz", hash = "sha256:f5452aeddd9988eefa20f90f05ab66f17fce1ee2a36907fd30b05bbb5953814d"},
 ]
 
 [package.dependencies]

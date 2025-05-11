@@ -23,7 +23,7 @@ poetry add aiden
 For development installation:
 
 ```bash
-git clone https://github.com/aiden/aiden.git
+git clone https://github.com/getaiden/aiden.git
 cd aiden
 poetry install
 ```
