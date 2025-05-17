@@ -3,7 +3,8 @@ import logging
 import os
 import uuid
 from datetime import datetime
-from typing import Dict, Type
+from pathlib import Path
+from typing import Dict, Type, Optional, Union
 
 from pandas import DataFrame
 from pydantic import BaseModel
@@ -16,6 +17,7 @@ from aiden.common.utils.transformation_state import TransformationState
 from aiden.config import prompt_templates
 from aiden.models.entities.description import TransformationDescription, SchemaInfo, CodeInfo
 from aiden.common.utils.transformation_utils import format_code_snippet
+from aiden.common.environment import get_environment, Environment
 
 # Define placeholders for classes that will be implemented later
 # This allows the code to type-check while maintaining the intended structure
@@ -52,25 +54,43 @@ class Transformation:
         intent: str,
         input_schema: Type[BaseModel] | Dict[str, type] = None,
         output_schema: Type[BaseModel] | Dict[str, type] = None,
+        environment: Optional[Union[dict, "Environment"]] = None,
     ):
         self.intent: str = intent
         self.input_schema: Type[BaseModel] = map_to_basemodel("in", input_schema) if input_schema else None
         self.output_schema: Type[BaseModel] = map_to_basemodel("out", output_schema) if output_schema else None
-        self.validation_dataset: Dict[str, DataFrame] = dict()
+        self.validation_dataset: Dict[str, DataFrame] = {}
+
+        # Initialize environment
+        if environment is None:
+            self._environment = get_environment()
+        elif isinstance(environment, Environment):
+            self._environment = environment
+        else:
+            self._environment = get_environment(**environment)
 
         # The model's mutable state is defined by these fields
         self.state: TransformationState = TransformationState.DRAFT
-        self.transformer_source: str | None = None
-        self.metadata: Dict[str, str] = dict()  # todo: initialise metadata, etc
+        self.transformer_source: Optional[str] = None
+
+        # Generate a unique run ID for this transformation
+        self.run_id = f"run-{datetime.now().isoformat()}".replace(":", "-").replace(".", "-")
+
+        # Set working directory based on environment
+        if self._environment.is_local and self._environment.workdir:
+            self.working_dir = str(Path(self._environment.workdir) / self.run_id)
+            os.makedirs(self.working_dir, exist_ok=True)
+        else:
+            raise ValueError("A valid working directory is required in the environment configuration")
 
         # Registries used to make datasets, artifacts and other objects available across the system
         self.object_registry = ObjectRegistry()
 
-        # Setup the working directory and unique identifiers
+        # Generate a unique identifier for this transformation
         self.identifier: str = f"transformation-{abs(hash(self.intent))}-{str(uuid.uuid4())}"
-        self.run_id = f"run-{datetime.now().isoformat()}".replace(":", "-").replace(".", "-")
-        self.working_dir = f"./workdir/{self.run_id}/"
-        os.makedirs(self.working_dir, exist_ok=True)
+
+        # Initialize metadata dictionary
+        self.metadata: Dict[str, str] = {}
 
     def build(
         self,
