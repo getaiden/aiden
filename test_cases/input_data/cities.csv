@@ -1,0 +1,9 @@
+City,Population,GDP (USD),Area (sq mi),Median Household Income ($),County
+Los Angeles,3900000,1000000000000,503,70000,Los Angeles
+San Diego,1400000,250000000000,372,80000,San Diego
+San Jose,1000000,275000000000,178,117000,Santa Clara
+San Francisco,815000,240000000000,47,126000,San Francisco
+Fresno,550000,80000000000,112,58000,Fresno
+Sacramento,525000,130000000000,99,71000,Sacramento
+Long Beach,470000,60000000000,52,63000,Los Angeles
+Oakland,430000,75000000000,78,85000,Alameda

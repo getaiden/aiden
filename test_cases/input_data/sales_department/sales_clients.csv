@@ -1,0 +1,4 @@
+ClientID,ClientName,Industry,Region,AccountManager,Email,Phone,Status
+C001,ABC Corp,Technology,North,S001,sales@abccorp.com,555-2001,Active
+C002,XYZ Ltd,Finance,North,S001,contact@xyzltd.com,555-2002,Prospect
+C003,Delta Inc,Healthcare,South,S002,info@delta.com,555-2003,Lost
