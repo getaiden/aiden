@@ -146,12 +146,10 @@ class Dataset:
         """
         # Pydantic model: return as is
         if isinstance(schema, type) and issubclass(schema, BaseModel):
-            print("schema is a pydantic model")
             return schema
 
         # Dictionary: convert to Pydantic model, if possible
         if isinstance(schema, dict):
-            print("schema is a dictionary")
             try:
                 # Handle both Dict[str, type] and Dict[str, str] formats
                 annotated_schema = {}

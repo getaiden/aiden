@@ -146,10 +146,6 @@ class Transformation:
                 },
             )
 
-            from pprint import pprint
-
-            pprint(generated)
-
             # Step 4: update model state and attributes
             self.transformer_source = generated.transformation_source_code
 
