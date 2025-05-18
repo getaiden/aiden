@@ -1,4 +1,4 @@
-Write a Python script to train a machine learning model that solves the TASK outlined below, 
+Write a Python script to transform a dataset that solves the TASK outlined below, 
 using the approach outlined in the plan below.
 
 # TASK:
@@ -16,15 +16,18 @@ be in the comments in the code itself, but your overall answer must only consist
 
 The script MUST be wrapped in a function called `transformation` and follow this format:
 
+Use the input datasets path and types to read the datasets.
+Use the output dataset path and type to write the dataset.
+
+BE SURE to use dataset path to read input and write output.
+
+If the file dont exist, be sure use the right path based on the execution script location.
+
+Alwayse check if the output file is created> If not created raise an exception
+
 ```python
 
-import click
-
-
-@click.command()
-@click.option('--input', help='Input parquet file')
-@click.option('--output', help='Output parquet file.')
-def transformation(input, output):
+def transformation():
     # The transformation code should be here 
 
 if __name__ == "__main__":
@@ -34,7 +37,7 @@ if __name__ == "__main__":
 
 - The code validation will be like this: 
 ```bash
-python transformation.py --input <input> --output <output>
+python transformation.py
 ```
 
 - Use only {{ allowed_packages }}. Do NOT use any packages that are not part of this list of the Python standard library.

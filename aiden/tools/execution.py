@@ -9,7 +9,6 @@ import logging
 import uuid
 from typing import Callable, Dict, List, Type
 
-from pandas import DataFrame
 from smolagents import tool
 
 from aiden.common.registries.objects import ObjectRegistry
@@ -20,7 +19,7 @@ from aiden.models.execution.process_executor import ProcessExecutor
 logger = logging.getLogger(__name__)
 
 
-def get_executor_tool(distributed: bool = False) -> Callable:
+def get_executor_tool(distributed: bool = False, environment: str = "local") -> Callable:
     """Get the appropriate executor tool based on the distributed flag."""
 
     @tool
@@ -46,12 +45,13 @@ def get_executor_tool(distributed: bool = False) -> Callable:
         # Log the distributed flag
         logger.debug(f"execute_training_code called with distributed={distributed}")
 
+        # Log the environment
+        logger.debug(f"execute_training_code called with environment={environment}")
+
         object_registry = ObjectRegistry()
 
         execution_id = f"{node_id}-{uuid.uuid4()}"
         try:
-            # Get actual datasets from registry
-            datasets = object_registry.get_multiple(DataFrame, dataset_names)
 
             # Create a node to store execution results
             node = Node(solution_plan="")  # We only need this for execute_node
@@ -63,7 +63,7 @@ def get_executor_tool(distributed: bool = False) -> Callable:
             from aiden.config import config
 
             # Get the appropriate executor class via the factory
-            executor_class = _get_executor_class(distributed=distributed)
+            executor_class = _get_executor_class(distributed=distributed, environment=environment)
 
             # Create an instance of the executor
             logger.debug(f"Creating {executor_class.__name__} for execution ID: {execution_id}")
@@ -71,7 +71,6 @@ def get_executor_tool(distributed: bool = False) -> Callable:
                 execution_id=execution_id,
                 code=code,
                 working_dir=working_dir,
-                datasets=datasets,
                 timeout=timeout,
                 code_execution_file_name=config.execution.runfile_name,
             )
@@ -114,29 +113,33 @@ def get_executor_tool(distributed: bool = False) -> Callable:
     return execute_code
 
 
-def _get_executor_class(distributed: bool = False) -> Type:
+def _get_executor_class(distributed: bool = False, environment: str = "local") -> Type:
     """Get the appropriate executor class based on the distributed flag.
 
     Args:
         distributed: Whether to use distributed execution if available
+        environment: The environment to use for execution
 
     Returns:
         Executor class (not instance) appropriate for the environment
     """
     # Log the distributed flag
     logger.debug(f"get_executor_class using distributed={distributed}")
-    if distributed:
-        try:
-            # Try to import Ray executor
-            from aiden.models.execution.ray_executor import RayExecutor
+    if environment == "local":
+        if distributed:
+            try:
+                # Try to import Ray executor
+                from aiden.models.execution.ray_executor import RayExecutor
 
-            logger.debug("Using Ray for distributed execution")
-            return RayExecutor
-        except ImportError:
-            # Fall back to process executor if Ray is not available
-            logger.warning("Ray not available, falling back to ProcessExecutor")
+                logger.debug("Using Ray for distributed execution")
+                return RayExecutor
+            except ImportError:
+                # Fall back to process executor if Ray is not available
+                logger.warning("Ray not available, falling back to ProcessExecutor")
+                return ProcessExecutor
+        else:
+            # Default to ProcessExecutor for non-distributed execution
+            logger.debug("Using ProcessExecutor (non-distributed)")
             return ProcessExecutor
-
-    # Default to ProcessExecutor for non-distributed execution
-    logger.debug("Using ProcessExecutor (non-distributed)")
-    return ProcessExecutor
+    elif environment == "dagster":
+        raise Exception("Dagster environment not implemented yet")

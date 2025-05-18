@@ -72,10 +72,9 @@ class AidenAgent:
                 "Data engineer that implements Data transformation code based on provided plan. "
                 "To work effectively, as part of the 'task' prompt the agent STRICTLY requires:"
                 "- the Data transformation task definition (i.e. 'intent' of the transformation)"
-                "- input schema for the transformation"
-                "- output schema for the transformation"
                 "- the full solution plan that outlines how to solve this problem given by the data_expert"
-                "- the dataset name"
+                "- the input datasets (containe name, path, format, schema)"
+                "- the output dataset (containe name, path, format, schema)"
                 "- the working directory to use for transformation execution"
             ),
             model=LiteLLMModel(model_id=self.data_engineer_model_id),
@@ -97,8 +96,8 @@ class AidenAgent:
                 "Data expert that develops detailed solution ideas and plan for Data transformation use case. "
                 "To work effectively, as part of the 'task' prompt the agent STRICTLY requires:"
                 "- the Data transformation task definition (i.e. 'intent')"
-                "- input schema for the data transformation"
-                "- output schema for the data transformation"
+                "- the input datasets (containe name, path, format, schema)"
+                "- the output dataset (containe name, path, format, schema)"
             ),
             model=LiteLLMModel(model_id=self.data_expert_model_id),
             tools=[],

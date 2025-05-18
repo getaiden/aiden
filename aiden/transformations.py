@@ -1,23 +1,21 @@
-import json
 import logging
 import os
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Type, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pandas import DataFrame
-from pydantic import BaseModel
 
 from aiden.agents import AidenAgent
+from aiden.common.dataset import Dataset
+from aiden.common.environment import Environment, get_environment
 from aiden.common.provider import ProviderConfig
 from aiden.common.registries.objects import ObjectRegistry
-from aiden.common.utils.pydantic_utils import format_schema, map_to_basemodel
 from aiden.common.utils.transformation_state import TransformationState
-from aiden.config import prompt_templates
-from aiden.models.entities.description import TransformationDescription, SchemaInfo, CodeInfo
 from aiden.common.utils.transformation_utils import format_code_snippet
-from aiden.common.environment import get_environment, Environment
+from aiden.config import prompt_templates
+from aiden.models.entities.description import CodeInfo, SchemaInfo, TransformationDescription
 
 # Define placeholders for classes that will be implemented later
 # This allows the code to type-check while maintaining the intended structure
@@ -52,14 +50,12 @@ class Transformation:
     def __init__(
         self,
         intent: str,
-        input_schema: Type[BaseModel] | Dict[str, type] = None,
-        output_schema: Type[BaseModel] | Dict[str, type] = None,
         environment: Optional[Union[dict, "Environment"]] = None,
     ):
         self.intent: str = intent
-        self.input_schema: Type[BaseModel] = map_to_basemodel("in", input_schema) if input_schema else None
-        self.output_schema: Type[BaseModel] = map_to_basemodel("out", output_schema) if output_schema else None
         self.validation_dataset: Dict[str, DataFrame] = {}
+        self.input_datasets: List["Dataset"] = []
+        self.output_dataset: Optional["Dataset"] = None
 
         # Initialize environment
         if environment is None:
@@ -94,7 +90,8 @@ class Transformation:
 
     def build(
         self,
-        validation_dataset: DataFrame,
+        input_datasets: List["Dataset"],
+        output_dataset: "Dataset",
         provider: str | ProviderConfig = "openai/gpt-4o",
         timeout: int = None,
         verbose: bool = False,
@@ -113,21 +110,20 @@ class Transformation:
             # TODO: provider_obj = Provider(model=provider_config.tool_provider)
             self.state = TransformationState.BUILDING
 
-            # Step 1: register validation dataset
-            self.validation_dataset["validation_dataset"] = validation_dataset
-            self.object_registry.register(DataFrame, "validation_dataset", validation_dataset)
+            # Step 1: register validation dataset and store datasets for schema access
+            self.input_datasets = input_datasets
+            self.output_dataset = output_dataset
 
-            # Step 2: resolve schemas
-            self.object_registry.register(dict, "input_schema", format_schema(self.input_schema))
-            self.object_registry.register(dict, "output_schema", format_schema(self.output_schema))
+            for dataset in input_datasets:
+                self.validation_dataset[dataset.name] = dataset
+                self.object_registry.register(Dataset, dataset.name, dataset)
 
             # Step 3: generate model
             # Start the model generation run
             agent_prompt = prompt_templates.agent_builder_prompt(
                 intent=self.intent,
-                input_schema=json.dumps(format_schema(self.input_schema), indent=4),
-                output_schema=json.dumps(format_schema(self.output_schema), indent=4),
-                datasets=["`validation_dataset`"],
+                input_datasets=[f"`{dataset}`" for dataset in input_datasets],
+                output_dataset=f"`{output_dataset}`",
                 working_dir=self.working_dir,
             )
 
@@ -144,11 +140,15 @@ class Transformation:
                 additional_args={
                     "intent": self.intent,
                     "working_dir": self.working_dir,
-                    "input_schema": format_schema(self.input_schema),
-                    "output_schema": format_schema(self.output_schema),
+                    "input_datasets_names": [dataset.name for dataset in input_datasets],
+                    "output_dataset_name": output_dataset.name,
                     "timeout": timeout,
                 },
             )
+
+            from pprint import pprint
+
+            pprint(generated)
 
             # Step 4: update model state and attributes
             self.transformer_source = generated.transformation_source_code
@@ -177,6 +177,14 @@ class Transformation:
             logger.error(f"Error during model building: {str(e)[:50]}")
             raise e
 
+    def save(self, path: str) -> None:
+        """
+        Save the transformation to a file.
+        :param path: path to save the transformation
+        """
+        with open(path, "w") as f:
+            f.write(self.transformer_source)
+
     def get_state(self) -> TransformationState:
         """
         Return the current state of the model.
@@ -198,10 +206,15 @@ class Transformation:
         :return: A TransformationDescription object with various methods like to_dict(), as_text(),
                 as_markdown(), to_json() for different output formats
         """
-        # Create schema info
+        # Create schema info with all input schemas
+        input_schemas_dict = {}
+        for dataset in self.input_datasets:
+            if dataset.schema:
+                input_schemas_dict[dataset.name] = Dataset.format_schema(dataset.schema)
+
         schemas = SchemaInfo(
-            input=format_schema(self.input_schema),
-            output=format_schema(self.output_schema),
+            inputs=input_schemas_dict,
+            output=Dataset.format_schema(self.output_schema),
         )
 
         # Create code info

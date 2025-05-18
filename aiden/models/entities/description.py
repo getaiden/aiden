@@ -7,7 +7,7 @@ metrics, and source code, organized in a structured format suitable
 for various output formats and visualization purposes.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
 from dataclasses_json import DataClassJsonMixin
@@ -17,8 +17,8 @@ from dataclasses_json import DataClassJsonMixin
 class SchemaInfo(DataClassJsonMixin):
     """Information about the model's input and output schemas."""
 
-    input: Dict[str, Any]
     output: Dict[str, Any]
+    inputs: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
 
 @dataclass

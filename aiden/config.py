@@ -292,17 +292,15 @@ class _PromptTemplates:
     def agent_builder_prompt(
         self,
         intent: str,
-        input_schema: str,
-        output_schema: str,
-        datasets: list[str] = None,
+        input_datasets: list[str] = None,
+        output_dataset: str = None,
         working_dir: str = None,
     ) -> str:
         return self._render(
             "manager_prompt.jinja",
             intent=intent,
-            input_schema=input_schema,
-            output_schema=output_schema,
-            datasets=datasets,
+            input_datasets=input_datasets,
+            output_dataset=output_dataset,
             working_dir=working_dir,
         )
 

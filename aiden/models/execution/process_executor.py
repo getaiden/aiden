@@ -19,15 +19,11 @@ Exceptions:
 """
 
 import logging
+import os
 import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict
-
-import pyarrow as pa
-import pyarrow.parquet as pq
-from pandas import DataFrame
 
 from aiden.config import config
 from aiden.models.execution.executor import ExecutionResult, Executor
@@ -48,7 +44,6 @@ class ProcessExecutor(Executor):
         execution_id: str,
         code: str,
         working_dir: Path | str,
-        datasets: Dict[str, DataFrame],
         timeout: int,
         code_execution_file_name: str = config.execution.runfile_name,
     ):
@@ -59,7 +54,7 @@ class ProcessExecutor(Executor):
             execution_id (str): Unique identifier for this execution.
             code (str): The Python code to execute.
             working_dir (Path | str): The working directory for execution.
-            datasets (Dict[str, DataFrame]): Datasets to be used for execution.
+            datasets (Dict[str, str]): Datasets to be used for execution.
             timeout (int): The maximum allowed execution time in seconds.
             code_execution_file_name (str): The filename to use for the executed script.
         """
@@ -69,7 +64,6 @@ class ProcessExecutor(Executor):
         self.working_dir.mkdir(parents=True, exist_ok=True)
         # Set the file names for the code and training data
         self.code_file_name = code_execution_file_name
-        self.datasets = datasets
         # Keep track of resources for cleanup
         self.dataset_files = []
         self.code_file = None
@@ -87,26 +81,15 @@ class ProcessExecutor(Executor):
             with open(self.code_file, "w", encoding="utf-8") as f:
                 f.write(module_setup + self.code)
 
-            # Write datasets to files
-            self.dataset_files = []
-            for dataset_name, dataset in self.datasets.items():
-                dataset_file: Path = self.working_dir / f"{dataset_name}.parquet"
-                pq.write_table(pa.Table.from_pandas(df=dataset), dataset_file)
-                self.dataset_files.append(dataset_file)
-
             # Execute the code in a subprocess
             self.process = subprocess.Popen(
                 [
                     sys.executable,
                     str(self.code_file),
-                    "--input",
-                    str(self.dataset_files[0]).split("/")[-1],
-                    "--output",
-                    "./output.parquet",
                 ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                cwd=str(self.working_dir),
+                cwd=os.getcwd(),  # str(self.working_dir),
                 text=True,
             )
 
@@ -121,7 +104,7 @@ class ProcessExecutor(Executor):
             else:
                 # If model_files directory doesn't exist, collect individual files
                 for file in self.working_dir.iterdir():
-                    if file != self.code_file and file not in self.dataset_files:
+                    if file != self.code_file:
                         model_artifacts.append(str(file))
 
             if self.process.returncode != 0:
@@ -168,8 +151,7 @@ class ProcessExecutor(Executor):
             )
         finally:
             # Always clean up resources regardless of execution path
-            # self.cleanup()
-            pass
+            self.cleanup()
 
     def cleanup(self):
         """
@@ -201,8 +183,7 @@ class ProcessExecutor(Executor):
     def __del__(self):
         """Ensure cleanup happens when the object is garbage collected."""
         try:
-            # self.cleanup()
-            pass
+            self.cleanup()
         except Exception:
             # Silent failure during garbage collection - detailed logging already done in cleanup()
             pass

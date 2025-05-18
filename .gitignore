@@ -49,6 +49,22 @@ coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Local development
+.venv/
+venv/
+ENV/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
 .pytest_cache/
 cover/
 
@@ -173,6 +189,11 @@ cython_debug/
 
 # Working directory for model generation
 workdir/
+custom_workdir/
+emails.csv
+clean_emails.csv
+artifact.py
+.windsurf
 
 # Example datasets
 examples/
