@@ -13,50 +13,111 @@ provider_config = ProviderConfig(
 
 # Define input and output datasets
 sales_clients = Dataset(
-    path="./examples/input_data/sales_department/sales_clients.csv",
+    path="./test_cases/input_data/sales_department/sales_clients.csv",
     format="csv",
-    schema={"ClientID": str, "ClientName": str, "Industry": str, "Region": str, "AccountManager": str, "Email": str, "Phone": str, "Status": str},
+    schema={
+        "ClientID": str,
+        "ClientName": str,
+        "Industry": str,
+        "Region": str,
+        "AccountManager": str,
+        "Email": str,
+        "Phone": str,
+        "Status": str,
+    },
 )
 sales_employee_information = Dataset(
-    path="./examples/input_data/sales_department/sales_employee_information.csv",
+    path="./test_cases/input_data/sales_department/sales_employee_information.csv",
     format="csv",
-    schema={"EmployeeID": str, "FirstName": str, "LastName": str, "JobTitle": str, "Region": str, "HireDate": str, "Email": str, "Phone": str, "ManagerID": str, "Status": str},
+    schema={
+        "EmployeeID": str,
+        "FirstName": str,
+        "LastName": str,
+        "JobTitle": str,
+        "Region": str,
+        "HireDate": str,
+        "Email": str,
+        "Phone": str,
+        "ManagerID": str,
+        "Status": str,
+    },
 )
 sales_leads = Dataset(
-    path="./examples/input_data/sales_department/sales_leads.csv",
+    path="./test_cases/input_data/sales_department/sales_leads.csv",
     format="csv",
-    schema={"LeadID": str, "EmployeeID": str, "ClientName": str, "ContactDate": str, "Status": str, "EstimatedValue": int, "Source": str},
+    schema={
+        "LeadID": str,
+        "EmployeeID": str,
+        "ClientName": str,
+        "ContactDate": str,
+        "Status": str,
+        "EstimatedValue": int,
+        "Source": str,
+    },
 )
 sales_performance = Dataset(
-    path="./examples/input_data/sales_department/sales_performance.csv",
+    path="./test_cases/input_data/sales_department/sales_performance.csv",
     format="csv",
     schema={"EmployeeID": str, "ReviewDate": str, "KPIs": str, "Score": float, "Comments": str},
 )
 sales_targets = Dataset(
-    path="./examples/input_data/sales_department/sales_targets.csv",
+    path="./test_cases/input_data/sales_department/sales_targets.csv",
     format="csv",
-    schema={"EmployeeID": str, "Month": str, "Year": str, "TargetAmount": int, "AchievedAmount": int, "AchievementPercentage": float},
+    schema={
+        "EmployeeID": str,
+        "Month": str,
+        "Year": str,
+        "TargetAmount": int,
+        "AchievedAmount": int,
+        "AchievementPercentage": float,
+    },
 )
 sales_training = Dataset(
-    path="./examples/input_data/sales_department/sales_training.csv",
+    path="./test_cases/input_data/sales_department/sales_training.csv",
     format="csv",
-    schema={"SessionID": str, "TrainingTopic": str, "Trainer": str, "Date": str, "DurationHours": int, "EmployeeIDs": str},
+    schema={
+        "SessionID": str,
+        "TrainingTopic": str,
+        "Trainer": str,
+        "Date": str,
+        "DurationHours": int,
+        "EmployeeIDs": str,
+    },
 )
 sales_transactions = Dataset(
-    path="./examples/input_data/sales_department/sales_transactions.csv",
+    path="./test_cases/input_data/sales_department/sales_transactions.csv",
     format="csv",
-    schema={"TransactionID": str, "EmployeeID": str, "ClientName": str, "TransactionDate": str, "Amount": int, "Product": str, "Status": str},
+    schema={
+        "TransactionID": str,
+        "EmployeeID": str,
+        "ClientName": str,
+        "TransactionDate": str,
+        "Amount": int,
+        "Product": str,
+        "Status": str,
+    },
 )
 out_dev_dataset = Dataset(
-    path="./examples/output_data/fact_sales_performance.csv",
+    path="./test_cases/output_data/fact_sales_performance.csv",
     format="csv",
-    schema={"EmployeeID": str, "Year": str, "Month": int, "TotalSales": float, "TotalLeads": int, "LeadsWon": int, "LeadConversionRate": float, "SalesTarget": float, "SalesAchieved": float, "TargetAchievementPct": float},
+    schema={
+        "EmployeeID": str,
+        "Year": str,
+        "Month": int,
+        "TotalSales": float,
+        "TotalLeads": int,
+        "LeadsWon": int,
+        "LeadConversionRate": float,
+        "SalesTarget": float,
+        "SalesAchieved": float,
+        "TargetAchievementPct": float,
+    },
 )
 
 # Create environment object with custom workdir
 dev_env = Environment(
     type="local",
-    workdir="./examples/workdir/",
+    workdir="./test_cases/workdir/",
 )
 
 # Define transformation with natural language intent
@@ -70,7 +131,15 @@ tr = Transformation(
 
 # Build the transformation with specified datasets and providers
 tr.build(
-    input_datasets=[sales_clients, sales_employee_information, sales_leads, sales_performance, sales_targets, sales_training, sales_transactions],
+    input_datasets=[
+        sales_clients,
+        sales_employee_information,
+        sales_leads,
+        sales_performance,
+        sales_targets,
+        sales_training,
+        sales_transactions,
+    ],
     output_dataset=out_dev_dataset,
     provider=provider_config,
     verbose=True,

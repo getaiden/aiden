@@ -117,6 +117,7 @@ class Transformation:
             for dataset in input_datasets:
                 self.validation_dataset[dataset.name] = dataset
                 self.object_registry.register(Dataset, dataset.name, dataset)
+            self.object_registry.register(Dataset, output_dataset.name, output_dataset)
 
             # Step 3: generate model
             # Start the model generation run
@@ -141,7 +142,7 @@ class Transformation:
                 additional_args={
                     "intent": self.intent,
                     "working_dir": self.working_dir,
-                    "input_datasets_names": [dataset.name for dataset in input_datasets],
+                    "input_datasets_names": [str(dataset) for dataset in input_datasets],
                     "output_dataset_name": output_dataset.name,
                     "timeout": timeout,
                 },
