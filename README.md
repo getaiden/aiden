@@ -26,7 +26,9 @@ For development installation:
 git clone https://github.com/getaiden/aiden.git
 cd aiden
 poetry install
+source .venv/bin/activate
 ```
+
 
 ## Example Usage
 
