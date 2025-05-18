@@ -1,0 +1,4 @@
+TransactionID,EmployeeID,ClientName,TransactionDate,Amount,Product,Status
+T001,S001,ABC Corp,2024-05-10,15000,CRM Software,Completed
+T002,S002,Delta Inc,2024-05-09,0,Analytics Platform,Canceled
+T003,S003,FastNet Solutions,2024-05-15,28000,Cloud Services,Completed
