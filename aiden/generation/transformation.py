@@ -19,6 +19,7 @@ from typing import Dict, List
 
 from pydantic import BaseModel
 
+from aiden.common.environment import Environment
 from aiden.common.dataset import Dataset
 from aiden.common.environment import Environment
 from aiden.common.provider import Provider
