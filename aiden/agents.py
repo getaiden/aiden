@@ -10,6 +10,7 @@ from smolagents import CodeAgent, LiteLLMModel, ToolCallingAgent
 
 from aiden.common.registries.objects import ObjectRegistry
 from aiden.config import config
+from aiden.common.environment import Environment
 from aiden.models.entities.code import Code
 from aiden.tools.execution import get_executor_tool
 from aiden.tools.response_formatting import format_final_de_agent_response, format_final_manager_agent_response
@@ -40,6 +41,7 @@ class AidenAgent:
         data_expert_model_id: str = "openai/gpt-4o",
         data_engineer_model_id: str = "openai/gpt-4o",
         tool_model_id: str = "anthropic/claude-3-7-sonnet-latest",
+        environment: Environment = None,
         max_steps: int = 30,
         verbose: bool = False,
     ):
@@ -58,6 +60,7 @@ class AidenAgent:
         self.data_expert_model_id = data_expert_model_id
         self.data_engineer_model_id = data_engineer_model_id
         self.tool_model_id = tool_model_id
+        self.environment = environment
         self.max_steps = max_steps
         self.verbose = verbose
 
@@ -79,9 +82,9 @@ class AidenAgent:
             ),
             model=LiteLLMModel(model_id=self.data_engineer_model_id),
             tools=[
-                get_generate_transformation_code(self.tool_model_id),
-                get_fix_transformation_code(self.tool_model_id),
-                get_executor_tool(),
+                get_generate_transformation_code(llm_to_use=self.tool_model_id, environment=self.environment),
+                get_fix_transformation_code(llm_to_use=self.tool_model_id, environment=self.environment),
+                get_executor_tool(environment=self.environment),
                 format_final_de_agent_response,
             ],
             add_base_tools=False,

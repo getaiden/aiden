@@ -7,10 +7,11 @@ ensuring that artifacts generated during the execution can be retrieved later in
 
 import logging
 import uuid
-from typing import Callable, Dict, List, Type
+from typing import Callable, Dict, List, Optional, Type
 
 from smolagents import tool
 
+from aiden.common.environment import Environment
 from aiden.common.registries.objects import ObjectRegistry
 from aiden.models.entities.code import Code
 from aiden.models.entities.node import Node
@@ -19,8 +20,16 @@ from aiden.models.execution.process_executor import ProcessExecutor
 logger = logging.getLogger(__name__)
 
 
-def get_executor_tool(distributed: bool = False, environment: str = "local") -> Callable:
-    """Get the appropriate executor tool based on the distributed flag."""
+def get_executor_tool(distributed: bool = False, environment: Optional[Environment] = None) -> Callable:
+    """Get the appropriate executor tool based on the distributed flag and environment.
+
+    Args:
+        distributed: Whether to use distributed execution
+        environment: The Environment object to use for execution. If None, a default local environment will be used.
+
+    Returns:
+        A callable tool function for executing code
+    """
 
     @tool
     def execute_code(
@@ -45,14 +54,16 @@ def get_executor_tool(distributed: bool = False, environment: str = "local") -> 
         # Log the distributed flag
         logger.debug(f"execute_training_code called with distributed={distributed}")
 
+        # Create default environment if none provided
+        env = environment or Environment(type="local")
+
         # Log the environment
-        logger.debug(f"execute_training_code called with environment={environment}")
+        logger.debug(f"execute_training_code called with environment={env}")
 
         object_registry = ObjectRegistry()
 
         execution_id = f"{node_id}-{uuid.uuid4()}"
         try:
-
             # Create a node to store execution results
             node = Node(solution_plan="")  # We only need this for execute_node
 
@@ -63,7 +74,7 @@ def get_executor_tool(distributed: bool = False, environment: str = "local") -> 
             from aiden.config import config
 
             # Get the appropriate executor class via the factory
-            executor_class = _get_executor_class(distributed=distributed, environment=environment)
+            executor_class = _get_executor_class(distributed=distributed, environment=env)
 
             # Create an instance of the executor
             logger.debug(f"Creating {executor_class.__name__} for execution ID: {execution_id}")
@@ -73,6 +84,7 @@ def get_executor_tool(distributed: bool = False, environment: str = "local") -> 
                 working_dir=working_dir,
                 timeout=timeout,
                 code_execution_file_name=config.execution.runfile_name,
+                environment=env,
             )
 
             # Execute and collect results - ProcessExecutor.run() handles cleanup internally
@@ -113,19 +125,23 @@ def get_executor_tool(distributed: bool = False, environment: str = "local") -> 
     return execute_code
 
 
-def _get_executor_class(distributed: bool = False, environment: str = "local") -> Type:
-    """Get the appropriate executor class based on the distributed flag.
+def _get_executor_class(distributed: bool = False, environment: Environment = None) -> Type:
+    """Get the appropriate executor class based on the distributed flag and environment.
 
     Args:
         distributed: Whether to use distributed execution if available
-        environment: The environment to use for execution
+        environment: The Environment object to use for execution. If None, a default local environment will be used.
 
     Returns:
         Executor class (not instance) appropriate for the environment
     """
     # Log the distributed flag
     logger.debug(f"get_executor_class using distributed={distributed}")
-    if environment == "local":
+
+    # Create default environment if none provided
+    env = environment or Environment(type="local")
+
+    if env.type == "local":
         if distributed:
             try:
                 # Try to import Ray executor
@@ -141,5 +157,5 @@ def _get_executor_class(distributed: bool = False, environment: str = "local") -
             # Default to ProcessExecutor for non-distributed execution
             logger.debug("Using ProcessExecutor (non-distributed)")
             return ProcessExecutor
-    elif environment == "dagster":
-        raise Exception("Dagster environment not implemented yet")
+    elif env.type == "dagster":
+        return ProcessExecutor

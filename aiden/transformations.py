@@ -73,7 +73,7 @@ class Transformation:
         self.run_id = f"run-{datetime.now().isoformat()}".replace(":", "-").replace(".", "-")
 
         # Set working directory based on environment
-        if self._environment.is_local and self._environment.workdir:
+        if (self._environment.is_local or self._environment.is_dagster) and self._environment.workdir:
             self.working_dir = str(Path(self._environment.workdir) / self.run_id)
             os.makedirs(self.working_dir, exist_ok=True)
         else:
@@ -132,6 +132,7 @@ class Transformation:
                 data_expert_model_id=provider_config.data_expert_provider,
                 data_engineer_model_id=provider_config.data_engineer_provider,
                 tool_model_id=provider_config.tool_provider,
+                environment=self._environment,
                 max_steps=30,
                 verbose=verbose,
             )
