@@ -13,19 +13,25 @@ def get_generate_transformation_code(llm_to_use: str) -> Callable:
     """Returns a tool function to generate transformation code with the model ID pre-filled."""
 
     @tool
-    def generate_transformation_code(task: str, solution_plan: str, transformation_datasets: List[str]) -> str:
+    def generate_transformation_code(
+        task: str,
+        solution_plan: str,
+        input_datasets_names: List[str],
+        output_dataset_name: str,
+    ) -> str:
         """Generates transformation code based on the solution plan.
 
         Args:
             task: The task definition
             solution_plan: The solution plan to implement
-            transformation_datasets: Keys of datasets to use for transformation
+            input_datasets_names: Names of datasets to use for transformation
+            output_dataset_name: Name of the dataset to store the transformation results
 
         Returns:
             Generated transformation code as a string
         """
         generator = TransformationCodeGenerator(Provider(llm_to_use))
-        return generator.generate_transformation_code(task, solution_plan, transformation_datasets)
+        return generator.generate_transformation_code(task, solution_plan, input_datasets_names, output_dataset_name)
 
     return generate_transformation_code
 
@@ -41,7 +47,7 @@ def get_fix_transformation_code(llm_to_use: str) -> Callable:
         issue: str,
     ) -> str:
         """
-        Fixes issues in the training code based on a review.
+        Fixes issues in the transformation code based on a review.
 
         Args:
             transformation_code: The transformation code to fix
@@ -50,7 +56,7 @@ def get_fix_transformation_code(llm_to_use: str) -> Callable:
             issue: Description of the issue to address
 
         Returns:
-            Fixed training code as a string
+            Fixed transformation code as a string
         """
         generator = TransformationCodeGenerator(Provider(llm_to_use))
         return generator.fix_transformation_code(transformation_code, solution_plan, review, issue)

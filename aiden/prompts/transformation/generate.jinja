@@ -16,14 +16,15 @@ be in the comments in the code itself, but your overall answer must only consist
 
 The script MUST be wrapped in a function called `transformation` and follow this format:
 
-Use the input datasets path and types to read the datasets.
-Use the output dataset path and type to write the dataset.
+USE ONLY input dataset path, type and schema below to read the input datasets:
+{{input_datasets}}
 
-BE SURE to use dataset path to read input and write output.
+USE ONLY output dataset path schema and type below to write the dataset:
+{{output_dataset}}
 
 If the file dont exist, be sure use the right path based on the execution script location.
 
-Alwayse check if the output file is created> If not created raise an exception
+Always check if the output file is created. If not created raise an exception
 
 ```python
 
