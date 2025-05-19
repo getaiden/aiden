@@ -207,3 +207,7 @@ trash/
 #gradio
 .gradio/
 .ruff_cache/
+
+# tests
+tests/output_data/*
+tests/artifacts/*

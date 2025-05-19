@@ -47,10 +47,11 @@ rich = "^13.7.1"
 smolagents = { extras = ["telemetry", "toolkit"], version = "^1.15.0" }
 click = "^8.1.7"
 strawberry-graphql = "0.267.0"
+dagster = { version = "^1.10.15", optional = true }
+dagster-webserver = { version = "^1.10.15", optional = true }
 
 [tool.poetry.extras]
-all = []
-lightweight = []
+dagster = ["dagster", "dagster-webserver"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"

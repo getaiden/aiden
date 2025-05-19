@@ -27,6 +27,7 @@ from pathlib import Path
 
 from aiden.config import config
 from aiden.models.execution.executor import ExecutionResult, Executor
+from aiden.common.environment import Environment
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ class ProcessExecutor(Executor):
         code: str,
         working_dir: Path | str,
         timeout: int,
+        environment: Environment,
         code_execution_file_name: str = config.execution.runfile_name,
     ):
         """
@@ -56,6 +58,7 @@ class ProcessExecutor(Executor):
             working_dir (Path | str): The working directory for execution.
             datasets (Dict[str, str]): Datasets to be used for execution.
             timeout (int): The maximum allowed execution time in seconds.
+            environment (Environment): The environment to use for execution.
             code_execution_file_name (str): The filename to use for the executed script.
         """
         super().__init__(code, timeout)
@@ -68,6 +71,7 @@ class ProcessExecutor(Executor):
         self.dataset_files = []
         self.code_file = None
         self.process = None
+        self.environment = environment
 
     def run(self) -> ExecutionResult:
         """Execute code in a subprocess and return results."""
@@ -82,16 +86,31 @@ class ProcessExecutor(Executor):
                 f.write(module_setup + self.code)
 
             # Execute the code in a subprocess
-            self.process = subprocess.Popen(
-                [
-                    sys.executable,
-                    str(self.code_file),
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                cwd=os.getcwd(),  # str(self.working_dir),
-                text=True,
-            )
+            if self.environment.type == "local":
+                self.process = subprocess.Popen(
+                    [
+                        sys.executable,
+                        str(self.code_file),
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=os.getcwd(),  # str(self.working_dir),
+                    text=True,
+                )
+            elif self.environment.type == "dagster":
+                self.process = subprocess.Popen(
+                    [
+                        "dagster",
+                        "job",
+                        "execute",
+                        "-f",
+                        str(self.code_file),
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=os.getcwd(),  # str(self.working_dir),
+                    text=True,
+                )
 
             stdout, stderr = self.process.communicate(timeout=self.timeout)
             exec_time = time.time() - start_time

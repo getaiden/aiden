@@ -74,12 +74,14 @@ class _Config:
         # Deep learning packages that are optional
         _deep_learning_packages: List[str] = field(
             default_factory=lambda: [
-                "tensorflow-cpu",
-                "torch",
-                "transformers",
-                "tokenizers",
-                "accelerate",
-                "safetensors",
+                "dagster",
+            ]
+        )
+
+        # Deep learning packages that are optional
+        _dagster_packages: List[str] = field(
+            default_factory=lambda: [
+                "dagster",
             ]
         )
 
@@ -116,8 +118,8 @@ class _Config:
             """Dynamically determine which packages are available and can be used."""
             available_packages = self._base_packages.copy()
 
-            # Check if deep learning packages are installed and add them if they are
-            for package in self._deep_learning_packages:
+            # Check if dagster packages are installed and add them if they are
+            for package in self._dagster_packages:
                 if is_package_available(package):
                     available_packages.append(package)
 
@@ -138,6 +140,11 @@ class _Config:
         def deep_learning_available(self) -> bool:
             """Check if deep learning packages are available."""
             return any(is_package_available(pkg) for pkg in self._deep_learning_packages)
+
+        @property
+        def dagster_available(self) -> bool:
+            """Check if dagster packages are available."""
+            return any(is_package_available(pkg) for pkg in self._dagster_packages)
 
         k_fold_validation: int = field(default=5)
 
@@ -230,7 +237,7 @@ class _PromptTemplates:
         return self._render("transformation/system_prompt.jinja")
 
     def transformation_generate(
-        self, problem_statement, plan, history, input_datasets, output_dataset, allowed_packages
+        self, problem_statement, plan, history, input_datasets, output_dataset, allowed_packages, environment_type
     ) -> str:
         return self._render(
             "transformation/generate.jinja",
@@ -240,9 +247,12 @@ class _PromptTemplates:
             input_datasets=input_datasets,
             output_dataset=output_dataset,
             allowed_packages=allowed_packages,
+            environment_type=environment_type,
         )
 
-    def transformation_fix(self, transformation_code, plan, review, problems, allowed_packages) -> str:
+    def transformation_fix(
+        self, transformation_code, plan, review, problems, allowed_packages, environment_type
+    ) -> str:
         return self._render(
             "transformation/fix.jinja",
             transformation_code=transformation_code,
@@ -250,9 +260,12 @@ class _PromptTemplates:
             review=review,
             problems=problems,
             allowed_packages=allowed_packages,
+            environment_type=environment_type,
         )
 
-    def transformation_review(self, problem_statement, plan, transformation_code, problems, allowed_packages) -> str:
+    def transformation_review(
+        self, problem_statement, plan, transformation_code, problems, allowed_packages, environment_type
+    ) -> str:
         return self._render(
             "transformation/review.jinja",
             problem_statement=problem_statement,
@@ -260,6 +273,7 @@ class _PromptTemplates:
             transformation_code=transformation_code,
             problems=problems,
             allowed_packages=allowed_packages,
+            environment_type=environment_type,
         )
 
     def review_system(self) -> str:

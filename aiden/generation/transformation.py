@@ -19,6 +19,7 @@ from typing import Dict, List
 
 from pydantic import BaseModel
 
+from aiden.common.environment import Environment
 from aiden.common.dataset import Dataset
 from aiden.common.provider import Provider
 from aiden.common.registries.objects import ObjectRegistry
@@ -33,13 +34,14 @@ class TransformationCodeGenerator:
     A class to generate, fix, and review transformation code.
     """
 
-    def __init__(self, provider: Provider):
+    def __init__(self, provider: Provider, environment: Environment):
         """
         Initializes the TransformationCodeGenerator with an empty history.
 
         :param Provider provider: The provider to use for querying.
         """
         self.provider = provider
+        self.environment = environment
         self.history: List[Dict[str, str]] = []
 
     def generate_transformation_code(
@@ -72,6 +74,7 @@ class TransformationCodeGenerator:
                     output_dataset=str(output_dataset),
                     history=self.history,
                     allowed_packages=config.code_generation.allowed_packages,
+                    environment_type=self.environment.type,
                 ),
             )
         )
@@ -107,6 +110,7 @@ class TransformationCodeGenerator:
                         review=review,
                         problems=problems,
                         allowed_packages=config.code_generation.allowed_packages,
+                        environment_type=self.environment.type,
                     ),
                     response_format=FixResponse,
                 )
@@ -134,6 +138,7 @@ class TransformationCodeGenerator:
                 transformation_code=transformation_code,
                 problems=problems,
                 allowed_packages=config.code_generation.allowed_packages,
+                environment_type=self.environment.type,
             ),
         )
 

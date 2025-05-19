@@ -14,7 +14,19 @@ using the approach outlined in the plan below.
 Only return the code of the transformation script, no explanations outside the code. Any explanation should
 be in the comments in the code itself, but your overall answer must only consist of the code script.
 
+USE ONLY input dataset path, type and schema below to read the input datasets:
+{{input_datasets}}
+
+USE ONLY output dataset path schema and type below to write the dataset:
+{{output_dataset}}
+
+If the file dont exist, be sure use the right path based on the execution script location.
+
+Always check if the output file is created. If not created raise an exception.
+
 The script MUST be wrapped in a function called `transformation` and follow this format:
+
+{% if environment_type == "local" %}
 
 USE ONLY input dataset path, type and schema below to read the input datasets:
 {{input_datasets}}
@@ -40,5 +52,36 @@ if __name__ == "__main__":
 ```bash
 python transformation.py
 ```
+
+{% elif environment_type == "dagster" %}
+For each dataset, create a dagster asset to read the dataset.
+
+```python
+
+import pandas as pd
+
+import dagster as dg
+
+@dg.asset
+def <dataset_name_in_snake_case>() -> pd.DataFrame:
+    ## dagster asset to read the input dataset
+    
+
+
+@dg.asset
+def transform(<dataset_name_in_snake_case>: pd.DataFrame, ...):
+    pass
+
+
+defs = dg.Definitions(assets=[<dataset_name_in_snake_case>,..., transform])
+
+``` 
+
+- The code validation will be like this: 
+```bash
+dagster job execute -f transformation.py
+```
+
+{% endif %}
 
 - Use only {{ allowed_packages }}. Do NOT use any packages that are not part of this list of the Python standard library.

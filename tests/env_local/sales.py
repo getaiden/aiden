@@ -12,15 +12,20 @@ provider_config = ProviderConfig(
 )
 
 # Define input and output datasets
-in_dev_dataset = Dataset(
-    path="./examples/input_data/emails.csv",
+products_dataset = Dataset(
+    path="./examples/input_data/product_and_sales/product.csv",
     format="csv",
-    schema={"email": str},
+    schema={"product_id": str, "name": str, "category": str, "price": int},
+)
+sales_dataset = Dataset(
+    path="./examples/input_data/product_and_sales/sales.csv",
+    format="csv",
+    schema={"sale_id": str, "product_id": str, "quantity": int, "sale_date": str},
 )
 out_dev_dataset = Dataset(
-    path="./examples/output_data/clean_emails.csv",
+    path="./examples/output_data/sales_revenue.csv",
     format="csv",
-    schema={"email": str},
+    schema={"sale_id": str, "total_revenue": int},
 )
 
 # Create environment object with custom workdir
@@ -31,17 +36,17 @@ dev_env = Environment(
 
 # Define transformation with natural language intent
 tr = Transformation(
-    intent="clean emails column and keep only valid ones.",
+    intent="calculate the total revenue for each sale.",
     environment=dev_env,
 )
 
 # Build the transformation with specified datasets and providers
 tr.build(
-    input_datasets=[in_dev_dataset],
+    input_datasets=[products_dataset, sales_dataset],
     output_dataset=out_dev_dataset,
     provider=provider_config,
     verbose=False,
 )
 
 # Deploy the transformation
-tr.save("./artifacts/email_transformation.py")
+tr.save("./tests/artifacts/sales_revenue.py")

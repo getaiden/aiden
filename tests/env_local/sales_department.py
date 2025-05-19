@@ -146,4 +146,4 @@ tr.build(
 )
 
 # Deploy the transformation
-tr.save("./artifacts/sales_performance.py")
+tr.save("./tests/artifacts/sales_performance.py")
