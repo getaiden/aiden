@@ -28,6 +28,16 @@ The script MUST be wrapped in a function called `transformation` and follow this
 
 {% if environment_type == "local" %}
 
+USE ONLY input dataset path, type and schema below to read the input datasets:
+{{input_datasets}}
+
+USE ONLY output dataset path schema and type below to write the dataset:
+{{output_dataset}}
+
+If the file dont exist, be sure use the right path based on the execution script location.
+
+Always check if the output file is created. If not created raise an exception
+
 ```python
 
 def transformation():
