@@ -44,4 +44,4 @@ tr.build(
 )
 
 # Deploy the transformation
-tr.save("./artifacts/cities_ranking.py")
+tr.save("./tests/artifacts/cities_ranking.py")

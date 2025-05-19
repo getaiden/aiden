@@ -49,4 +49,4 @@ tr.build(
 )
 
 # Deploy the transformation
-tr.save("./artifacts/dagster_sales_revenue.py")
+tr.save("./tests/artifacts/dagster_sales_revenue.py")

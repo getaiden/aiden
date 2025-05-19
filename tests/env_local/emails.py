@@ -13,25 +13,25 @@ provider_config = ProviderConfig(
 
 # Define input and output datasets
 in_dev_dataset = Dataset(
-    path="./test_cases/input_data/cities.csv",
+    path="./examples/input_data/emails.csv",
     format="csv",
-    schema={"City": str, "Population": int, "GDP (USD)": int, "Area (sq mi)": int, "Median Household Income ($)": int, "County": str},
+    schema={"email": str},
 )
 out_dev_dataset = Dataset(
-    path="./test_cases/output_data/cities_ranking.csv",
+    path="./examples/output_data/clean_emails.csv",
     format="csv",
-    schema={"City": str, "rank": int},
+    schema={"email": str},
 )
 
 # Create environment object with custom workdir
 dev_env = Environment(
-    type="dagster",
-    workdir="./test_cases/workdir/",
+    type="local",
+    workdir="./examples/workdir/",
 )
 
 # Define transformation with natural language intent
 tr = Transformation(
-    intent="rank me those cities by the richest one taking into account all the information provided.",
+    intent="clean emails column and keep only valid ones.",
     environment=dev_env,
 )
 
@@ -44,4 +44,4 @@ tr.build(
 )
 
 # Deploy the transformation
-tr.save("./artifacts/dagster_cities_ranking.py")
+tr.save("./tests/artifacts/email_transformation.py")

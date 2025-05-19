@@ -115,8 +115,8 @@ out_dev_dataset = Dataset(
 )
 
 # Create environment object with custom workdir
-dagster_env = Environment(
-    type="dagster",
+dev_env = Environment(
+    type="local",
     workdir="./test_cases/workdir/",
 )
 
@@ -126,7 +126,7 @@ tr = Transformation(
     based on all data you have i want you to calculate the performance of sales per month wich means calculate the total of sales and TotalLeads made per month
     and calculate the lead conversion rate and the target achievement percentage and also calculate the sales achieved percentage        
     """,
-    environment=dagster_env,
+    environment=dev_env,
 )
 
 # Build the transformation with specified datasets and providers
@@ -146,4 +146,4 @@ tr.build(
 )
 
 # Deploy the transformation
-tr.save("./artifacts/dagster_sales_department.py")
+tr.save("./tests/artifacts/sales_performance.py")
