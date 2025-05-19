@@ -13,20 +13,24 @@ for the team if absolutely necessary.
 ### 1.1. Problem Statement (What the Data Transformation Should Do)
 {{intent}}
 
-### 1.2. Input Schema (Expected Input Schema for the Data Transformation)
-{{input_schema}}
-
-### 1.3. Output Schema (Expected Output Schema for the Data Transformation)
-{{output_schema}}
-
-## 2. Available validation Datasets
-The following datasets are available for validation of the Data transformation implementation. You must always refer to the datasets by these
+## 2. Available Input Datasets
+The following datasets are available as input for the Data transformation implementation. You must always refer to the input datasets by these
 names. The datasets are:
 
-{{datasets|join(', ')}}
+{{input_datasets|join(', ')}}
 
+## 3. Available Output Dataset
+The following dataset is available as output for the Data transformation implementation. You must always refer to the output dataset by this
+name. The dataset is:
 
-## 3. Instructions
+{{output_dataset}}
+
+## 4. Working Directory
+The working directory for the Data transformation implementation is:
+
+{{working_dir}}
+
+## 5. Instructions
 Carefully analyse the tools and managed agents available to you, and plan how to effectively plan possible approaches
 to the Data transformation problem, and finally deliver the Data transformation as a bundle consisting
 of the Data transformation code (as an ID), and other deliverables.

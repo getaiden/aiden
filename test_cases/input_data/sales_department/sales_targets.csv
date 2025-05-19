@@ -1,0 +1,4 @@
+EmployeeID,Month,Year,TargetAmount,AchievedAmount,AchievementPercentage
+S001,May,2024,50000,48000,96
+S002,May,2024,60000,62000,103.33
+S003,May,2024,45000,28000,62.22

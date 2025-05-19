@@ -1,0 +1,4 @@
+LeadID,EmployeeID,ClientName,ContactDate,Status,EstimatedValue,Source
+L001,S001,ABC Corp,2024-05-01,Closed Won,15000,Email Campaign
+L002,S001,XYZ Ltd,2024-05-03,In Progress,12000,Web Form
+L003,S002,Delta Inc,2024-05-05,Closed Lost,10000,Referral

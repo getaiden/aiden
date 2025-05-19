@@ -230,14 +230,15 @@ class _PromptTemplates:
         return self._render("transformation/system_prompt.jinja")
 
     def transformation_generate(
-        self, problem_statement, plan, transformation_data_files, history, allowed_packages
+        self, problem_statement, plan, history, input_datasets, output_dataset, allowed_packages
     ) -> str:
         return self._render(
             "transformation/generate.jinja",
             problem_statement=problem_statement,
             plan=plan,
-            transformation_data_files=transformation_data_files,
             history=history,
+            input_datasets=input_datasets,
+            output_dataset=output_dataset,
             allowed_packages=allowed_packages,
         )
 
@@ -292,17 +293,15 @@ class _PromptTemplates:
     def agent_builder_prompt(
         self,
         intent: str,
-        input_schema: str,
-        output_schema: str,
-        datasets: list[str] = None,
+        input_datasets: list[str] = None,
+        output_dataset: str = None,
         working_dir: str = None,
     ) -> str:
         return self._render(
             "manager_prompt.jinja",
             intent=intent,
-            input_schema=input_schema,
-            output_schema=output_schema,
-            datasets=datasets,
+            input_datasets=input_datasets,
+            output_dataset=output_dataset,
             working_dir=working_dir,
         )
 

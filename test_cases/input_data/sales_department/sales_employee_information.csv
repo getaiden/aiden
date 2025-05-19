@@ -1,0 +1,4 @@
+EmployeeID,FirstName,LastName,JobTitle,Region,HireDate,Email,Phone,ManagerID,Status
+S001,Linda,Johnson,Sales Executive,North,2020-03-12,linda.johnson@example.com,555-1001,S010,Active
+S002,Carlos,Rivera,Account Manager,South,2019-07-05,carlos.rivera@example.com,555-1002,S010,Active
+S003,Sarah,Morris,Sales Representative,East,2021-06-18,sarah.morris@example.com,555-1003,S010,On Leave

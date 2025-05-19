@@ -26,45 +26,78 @@ For development installation:
 git clone https://github.com/getaiden/aiden.git
 cd aiden
 poetry install
+source .venv/bin/activate
 ```
+
 
 ## Example Usage
 
-Aiden makes it easy to transform data using natural language instructions. Here's a simple example of cleaning email addresses:
+Aiden makes it easy to transform data using natural language instructions. Here's a comprehensive example showing how to clean email addresses with custom configuration:
 
 ```python
 from aiden import Transformation
-from pandas import DataFrame
+from aiden.common.dataset import Dataset
+from aiden.common.environment import Environment
+from aiden.common.provider import ProviderConfig
 
-# Create a validation dataset
-validation_df = DataFrame(
-    {
-        "email":
-        ["test", "test2", "test@test.com", "test@test.com"]
-    }
+# Configure AI providers for each agent
+provider_config = ProviderConfig(
+    manager_provider="openai/gpt-4o",
+    data_expert_provider="openai/gpt-4o",
+    data_engineer_provider="openai/gpt-4o",
+    tool_provider="anthropic/claude-3-7-sonnet-latest",
 )
 
-# Define your transformation with natural language intent
+# Define input and output datasets
+in_dev_dataset = Dataset(
+    path="./emails.csv",
+    format="csv",
+    schema={"email": str},
+)
+out_dev_dataset = Dataset(
+    path="./clean_emails.csv",
+    format="csv",
+    schema={"email": str},
+)
+
+# Create environment object with custom workdir
+dev_env = Environment(
+    type="local",
+    workdir="./custom_workdir/",
+)
+
+# Define transformation with natural language intent
 tr = Transformation(
-    intent="""Clean the email column by:
-    1. Removing any leading or trailing whitespace
-    2. Converting all emails to lowercase
-    3. Validating email format (must contain @ and a valid domain)
-    4. Removing duplicate email addresses
-    5. Filtering out emails from disposable domains
-    Return only the valid, cleaned email addresses.""",
-    input_schema={"email": str},
-    output_schema={"email": str},
+    intent="clean emails column and keep only valid ones.",
+    environment=dev_env,
 )
 
-# Build the transformation with the validation dataset
-tr.build(validation_dataset=validation_df)
+# Build the transformation with specified datasets and providers
+tr.build(
+    input_datasets=[in_dev_dataset],
+    output_dataset=out_dev_dataset,
+    provider=provider_config,
+    verbose=True,
+)
 
-# Print the transformation description
-print(tr.describe().as_markdown())
+# Deploy the transformation
+tr.save("./artifact.py")
 ```
 
-This example demonstrates how to create a transformation that cleans email addresses, validates the transformation with sample data, and then applies it to your actual dataset.
+This example demonstrates how to:
+1. Configure specific AI providers for each agent
+2. Define input and output datasets with schemas
+3. Set up a custom environment
+4. Build a transformation with natural language intent
+5. Deploy the transformation to a Python file
+
+## Advanced Features
+
+Aiden provides several advanced features:
+- **Custom Environments**: Configure where transformations run
+- **Provider Configuration**: Specify which AI models power each agent
+- **Dataset Definitions**: Explicitly define input/output datasets with schemas
+- **Deployment**: Save transformations as standalone Python files
 
 ## License
 

@@ -15,12 +15,13 @@ Classes:
 
 import json
 import logging
-from pathlib import Path
 from typing import Dict, List
 
 from pydantic import BaseModel
 
+from aiden.common.dataset import Dataset
 from aiden.common.provider import Provider
+from aiden.common.registries.objects import ObjectRegistry
 from aiden.common.utils.response import extract_code
 from aiden.config import config, prompt_templates
 
@@ -45,22 +46,30 @@ class TransformationCodeGenerator:
         self,
         problem_statement: str,
         plan: str,
-        transformation_datasets: List[str],
+        input_datasets_names: List[str],
+        output_dataset_name: str,
     ) -> str:
         """
         Generates transformation code based on the given problem statement and solution plan.
 
         :param [str] problem_statement: The description of the problem to be solved.
         :param [str] plan: The proposed solution plan.
+        :param [List[str]] input_datasets_names: The names of the datasets to use for transformation.
+        :param [str] output_dataset_name: The name of the dataset to store the transformation results.
         :return str: The generated transformation code.
         """
+        registry = ObjectRegistry()
+        input_datasets = registry.get_multiple(Dataset, input_datasets_names)
+        output_dataset = registry.get(Dataset, output_dataset_name)
+
         return extract_code(
             self.provider.query(
                 system_message=prompt_templates.transformation_system(),
                 user_message=prompt_templates.transformation_generate(
                     problem_statement=problem_statement,
                     plan=plan,
-                    transformation_data_files=[Path(f"{file}.parquet").as_posix() for file in transformation_datasets],
+                    input_datasets=[str(v) for _, v in input_datasets.items()],
+                    output_dataset=str(output_dataset),
                     history=self.history,
                     allowed_packages=config.code_generation.allowed_packages,
                 ),
