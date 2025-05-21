@@ -5,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from pandas import DataFrame
 
 from aiden.agents import AidenAgent
 from aiden.common.dataset import Dataset
@@ -53,34 +52,23 @@ class Transformation:
         environment: Optional[Union[dict, "Environment"]] = None,
     ):
         self.intent: str = intent
-        self.validation_dataset: Dict[str, DataFrame] = {}
-        self.input_datasets: List["Dataset"] = []
-        self.output_dataset: Optional["Dataset"] = None
+        self.input_datasets: List["Dataset"]
+        self.output_dataset: "Dataset"
 
         # Initialize environment
         if environment is None:
-            self._environment = get_environment()
+            self.environment = get_environment()
         elif isinstance(environment, Environment):
-            self._environment = environment
+            self.environment = environment
         else:
-            self._environment = get_environment(**environment)
+            self.environment = get_environment(**environment)
 
-        # The model's mutable state is defined by these fields
+        # The Transformation's mutable state is defined by these fields
         self.state: TransformationState = TransformationState.DRAFT
-        self.transformer_source: Optional[str] = None
+        self.transformer_source: str = ""
 
         # Generate a unique run ID for this transformation
         self.run_id = f"run-{datetime.now().isoformat()}".replace(":", "-").replace(".", "-")
-
-        # Set working directory based on environment
-        if (self._environment.is_local or self._environment.is_dagster) and self._environment.workdir:
-            self.working_dir = str(Path(self._environment.workdir) / self.run_id)
-            os.makedirs(self.working_dir, exist_ok=True)
-        else:
-            raise ValueError("A valid working directory is required in the environment configuration")
-
-        # Registries used to make datasets, artifacts and other objects available across the system
-        self.object_registry = ObjectRegistry()
 
         # Generate a unique identifier for this transformation
         self.identifier: str = f"transformation-{abs(hash(self.intent))}-{str(uuid.uuid4())}"
@@ -88,12 +76,21 @@ class Transformation:
         # Initialize metadata dictionary
         self.metadata: Dict[str, str] = {}
 
+        # Set working directory based on environment
+        if (self.environment.is_local or self.environment.is_dagster) and self.environment.workdir:
+            self.working_dir = str(Path(self.environment.workdir) / self.run_id)
+            os.makedirs(self.working_dir, exist_ok=True)
+        else:
+            raise ValueError("A valid working directory is required in the environment configuration")
+
+        # Registries used to make datasets, artifacts and other objects available across the system
+        self.object_registry = ObjectRegistry()
+
     def build(
         self,
         input_datasets: List["Dataset"],
         output_dataset: "Dataset",
         provider: str | ProviderConfig = "openai/gpt-4o",
-        timeout: int = None,
         verbose: bool = False,
     ) -> None:
         # Ensure the object registry is cleared before building
@@ -110,17 +107,16 @@ class Transformation:
             # TODO: provider_obj = Provider(model=provider_config.tool_provider)
             self.state = TransformationState.BUILDING
 
-            # Step 1: register validation dataset and store datasets for schema access
+            # Step 1: register input/output datasets
             self.input_datasets = input_datasets
             self.output_dataset = output_dataset
 
-            for dataset in input_datasets:
-                self.validation_dataset[dataset.name] = dataset
-                self.object_registry.register(Dataset, dataset.name, dataset)
+            for input_dataset in input_datasets:
+                self.object_registry.register(Dataset, input_dataset.name, input_dataset)
             self.object_registry.register(Dataset, output_dataset.name, output_dataset)
 
-            # Step 3: generate model
-            # Start the model generation run
+            # Step 2: generate transformation
+            # Start the transformation generation run
             agent_prompt = prompt_templates.agent_builder_prompt(
                 intent=self.intent,
                 input_datasets=[f"`{dataset}`" for dataset in input_datasets],
@@ -133,7 +129,7 @@ class Transformation:
                 data_expert_model_id=provider_config.data_expert_provider,
                 data_engineer_model_id=provider_config.data_engineer_provider,
                 tool_model_id=provider_config.tool_provider,
-                environment=self._environment,
+                environment=self.environment,
                 max_steps=30,
                 verbose=verbose,
             )
@@ -144,7 +140,6 @@ class Transformation:
                     "working_dir": self.working_dir,
                     "input_datasets_names": [str(dataset) for dataset in input_datasets],
                     "output_dataset_name": output_dataset.name,
-                    "timeout": timeout,
                 },
             )
 
@@ -154,13 +149,14 @@ class Transformation:
             # Store the model metadata from the generation process
             self.metadata.update(generated.metadata)
 
-            # # Store provider information in metadata
-            # self.metadata["provider"] = str(provider_config.default_provider)
-            # self.metadata["orchestrator_provider"] = str(provider_config.orchestrator_provider)
-            # self.metadata["expert_provider"] = str(provider_config.expert_provider)
-            # self.metadata["engineer_provider"] = str(provider_config.engineer_provider)
-            # self.metadata["ops_provider"] = str(provider_config.ops_provider)
-            # self.metadata["tool_provider"] = str(provider_config.tool_provider)
+            # Store provider information in metadata
+            self.metadata["provider"] = str(provider_config.default_provider)
+            self.metadata["orchestrator_provider"] = str(provider_config.manager_provider)
+            self.metadata["expert_provider"] = str(provider_config.data_expert_provider)
+            self.metadata["engineer_provider"] = str(provider_config.data_engineer_provider)
+            self.metadata["ops_provider"] = str(provider_config.tool_provider)
+            self.metadata["tool_provider"] = str(provider_config.tool_provider)
+            self.metadata["env_type"] = self.environment.type
 
             self.state = TransformationState.READY
 
@@ -212,7 +208,7 @@ class Transformation:
 
         schemas = SchemaInfo(
             inputs=input_schemas_dict,
-            output=Dataset.format_schema(self.output_schema),
+            output=Dataset.format_schema(self.output_dataset.schema),
         )
 
         # Create code info

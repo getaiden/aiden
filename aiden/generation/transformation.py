@@ -19,8 +19,8 @@ from typing import Dict, List
 
 from pydantic import BaseModel
 
-from aiden.common.environment import Environment
 from aiden.common.dataset import Dataset
+from aiden.common.environment import Environment
 from aiden.common.provider import Provider
 from aiden.common.registries.objects import ObjectRegistry
 from aiden.common.utils.response import extract_code
@@ -84,7 +84,7 @@ class TransformationCodeGenerator:
         transformation_code: str,
         plan: str,
         review: str,
-        problems: str = None,
+        problems: str | None = None,
     ) -> str:
         """
         Fixes the transformation code based on the review and identified problems.
@@ -119,7 +119,7 @@ class TransformationCodeGenerator:
         return extract_code(response.code)
 
     def review_transformation_code(
-        self, transformation_code: str, problem_statement: str, plan: str, problems: str = None
+        self, transformation_code: str, problem_statement: str, plan: str, problems: str | None = None
     ) -> str:
         """
         Reviews the transformation code to identify improvements and fix issues.
@@ -146,7 +146,7 @@ class TransformationCodeGenerator:
         raise NotImplementedError("Generation of the transformation tests is not yet implemented.")
 
     def fix_transformation_tests(
-        self, transformation_tests: str, transformation_code: str, review: str, problems: str = None
+        self, transformation_tests: str, transformation_code: str, review: str, problems: str | None = None
     ) -> str:
         raise NotImplementedError("Fixing of the transformation tests is not yet implemented.")
 

@@ -28,7 +28,7 @@ class Dataset:
     path: str
     format: str
     _data: Optional[Any] = None
-    _metadata: Dict[str, Any] = None
+    _metadata: Dict[str, Any] | None = None
     _name: Optional[str] = None
     schema: Optional[dict | Type[BaseModel]] = None
 

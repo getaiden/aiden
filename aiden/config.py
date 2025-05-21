@@ -43,14 +43,6 @@ class _Config:
         format: str = field(default="[%(asctime)s - %(name)s - %(levelname)s - (%(threadName)-10s)]: - %(message)s")
 
     @dataclass(frozen=True)
-    class _ModelSearchConfig:
-        initial_nodes: int = field(default=3)
-        max_nodes: int = field(default=15)
-        max_fixing_attempts_train: int = field(default=3)
-        max_fixing_attempts_predict: int = field(default=10)
-        max_time_elapsed: int = field(default=600)
-
-    @dataclass(frozen=True)
     class _ExecutionConfig:
         runfile_name: str = field(default="execution_script.py")
 
@@ -61,13 +53,9 @@ class _Config:
             default_factory=lambda: [
                 "pandas",
                 "numpy",
-                "scikit-learn",
-                "sklearn",
                 "joblib",
                 "mlxtend",
-                "xgboost",
                 "pyarrow",
-                "statsmodels",
             ]
         )
 
@@ -137,45 +125,15 @@ class _Config:
             return imports
 
         @property
-        def deep_learning_available(self) -> bool:
-            """Check if deep learning packages are available."""
-            return any(is_package_available(pkg) for pkg in self._deep_learning_packages)
-
-        @property
         def dagster_available(self) -> bool:
             """Check if dagster packages are available."""
             return any(is_package_available(pkg) for pkg in self._dagster_packages)
 
-        k_fold_validation: int = field(default=5)
-
-    @dataclass(frozen=True)
-    class _DataGenerationConfig:
-        pass  # todo: implement
-
-    @dataclass(frozen=True)
-    class _RayConfig:
-        address: str = field(default=None)  # None for local, Ray address for remote
-        num_cpus: int = field(default=None)  # None for auto-detect
-        num_gpus: int = field(default=None)  # None for auto-detect
-
     # configuration objects
     file_storage: _FileStorageConfig = field(default_factory=_FileStorageConfig)
     logging: _LoggingConfig = field(default_factory=_LoggingConfig)
-    model_search: _ModelSearchConfig = field(default_factory=_ModelSearchConfig)
     code_generation: _CodeGenerationConfig = field(default_factory=_CodeGenerationConfig)
     execution: _ExecutionConfig = field(default_factory=_ExecutionConfig)
-    data_generation: _DataGenerationConfig = field(default_factory=_DataGenerationConfig)
-    ray: _RayConfig = field(default_factory=_RayConfig)
-
-
-# @dataclass(frozen=True)
-# class _CodeTemplates:
-#     predictor_interface: str = field(
-#         default=Path(importlib.import_module("plexe.internal.models.interfaces.predictor").__file__).read_text()
-#     )
-#     predictor_template: str = field(
-#         default=files(template_module).joinpath("models").joinpath("predictor.tmpl.py").read_text()
-#     )
 
 
 @dataclass(frozen=True)
@@ -189,49 +147,6 @@ class _PromptTemplates:
     def _render(self, template_name: str, **kwargs) -> str:
         template = self.env.get_template(template_name)
         return template.render(**kwargs)
-
-    def planning_system(self) -> str:
-        return self._render("planning/system_prompt.jinja")
-
-    def planning_select_metric(self, problem_statement) -> str:
-        return self._render("planning/select_metric.jinja", problem_statement=problem_statement)
-
-    def planning_generate(self, problem_statement, metric_to_optimise) -> str:
-        return self._render(
-            "planning/generate.jinja",
-            problem_statement=problem_statement,
-            metric_to_optimise=metric_to_optimise,
-            allowed_packages=config.code_generation.allowed_packages,
-            deep_learning_available=config.code_generation.deep_learning_available,
-        )
-
-    def schema_base(self) -> str:
-        return self._render("schemas/base.jinja")
-
-    def schema_identify_target(self, columns, intent) -> str:
-        return self._render("schemas/identify_target.jinja", columns=columns, intent=intent)
-
-    def schema_generate_from_intent(self, intent, input_schema="input_schema", output_schema="output_schema") -> str:
-        return self._render(
-            "schemas/generate_from_intent.jinja", intent=intent, input_schema=input_schema, output_schema=output_schema
-        )
-
-    def training_system(self) -> str:
-        return self._render("training/system_prompt.jinja")
-
-    def training_generate(
-        self, problem_statement, plan, history, allowed_packages, training_data_files, validation_data_files
-    ) -> str:
-        return self._render(
-            "training/generate.jinja",
-            problem_statement=problem_statement,
-            plan=plan,
-            history=history,
-            allowed_packages=allowed_packages,
-            training_data_files=training_data_files,
-            validation_data_files=validation_data_files,
-            use_validation_files=len(validation_data_files) > 0,
-        )
 
     def transformation_system(self) -> str:
         return self._render("transformation/system_prompt.jinja")
@@ -276,40 +191,12 @@ class _PromptTemplates:
             environment_type=environment_type,
         )
 
-    def review_system(self) -> str:
-        return self._render("review/system_prompt.jinja")
-
-    def review_model(
-        self,
-        intent: str,
-        input_schema: str,
-        output_schema: str,
-        solution_plan: str,
-        training_code: str,
-        inference_code: str,
-    ) -> str:
-        return self._render(
-            "review/model.jinja",
-            intent=intent,
-            input_schema=input_schema,
-            output_schema=output_schema,
-            solution_plan=solution_plan,
-            training_code=training_code,
-            inference_code=inference_code,
-        )
-
-    def cot_system(self) -> str:
-        return self._render("utils/system_prompt.jinja")
-
-    def cot_summarize(self, context: str) -> str:
-        return self._render("utils/cot_summarize.jinja", context=context)
-
     def agent_builder_prompt(
         self,
         intent: str,
-        input_datasets: list[str] = None,
-        output_dataset: str = None,
-        working_dir: str = None,
+        input_datasets: list[str] | None = None,
+        output_dataset: str | None = None,
+        working_dir: str | None = None,
     ) -> str:
         return self._render(
             "manager_prompt.jinja",
@@ -327,9 +214,9 @@ prompt_templates: _PromptTemplates = _PromptTemplates()
 
 
 # Default logging configuration
-def configure_logging(level: str | int = logging.INFO, file: str = None) -> None:
+def configure_logging(level: str | int = logging.INFO, file: str | None = None) -> None:
     # Configure the library's root logger
-    sm_root_logger = logging.getLogger("plexe")
+    sm_root_logger = logging.getLogger("aiden")
     sm_root_logger.setLevel(level)
 
     # Clear existing handlers to avoid duplicate logs

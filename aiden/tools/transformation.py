@@ -1,16 +1,16 @@
 import logging
-from typing import Callable, List
+from typing import List
 
-from smolagents import tool
+from smolagents import Tool, tool
 
+from aiden.common.environment import Environment
 from aiden.common.provider import Provider
 from aiden.generation.transformation import TransformationCodeGenerator
-from aiden.common.environment import Environment
 
 logger = logging.getLogger(__name__)
 
 
-def get_generate_transformation_code(llm_to_use: str, environment: Environment) -> Callable:
+def get_generate_transformation_code(llm_to_use: str, environment: Environment) -> Tool:
     """Returns a tool function to generate transformation code with the model ID pre-filled."""
 
     @tool
@@ -37,7 +37,7 @@ def get_generate_transformation_code(llm_to_use: str, environment: Environment) 
     return generate_transformation_code
 
 
-def get_fix_transformation_code(llm_to_use: str, environment: Environment) -> Callable:
+def get_fix_transformation_code(llm_to_use: str, environment: Environment) -> Tool:
     """Returns a tool function to fix transformation code with the model ID pre-filled."""
 
     @tool

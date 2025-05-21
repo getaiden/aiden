@@ -8,14 +8,14 @@ from typing import Dict
 
 from smolagents import CodeAgent, LiteLLMModel, ToolCallingAgent
 
-from aiden.common.registries.objects import ObjectRegistry
-from aiden.config import config
 from aiden.common.environment import Environment
+from aiden.common.registries.objects import ObjectRegistry
+from aiden.common.utils.prompt import get_prompt_templates
+from aiden.config import config
 from aiden.models.entities.code import Code
 from aiden.tools.execution import get_executor_tool
 from aiden.tools.response_formatting import format_final_de_agent_response, format_final_manager_agent_response
 from aiden.tools.transformation import get_fix_transformation_code, get_generate_transformation_code
-from aiden.utils import get_prompt_templates
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AidenGenerationResult:
     transformation_source_code: str
-    transformation_code_id: str
-    metadata: Dict[str, str] = field(default_factory=dict)  # Model metadata
+    solution_plan: str
+    metadata: Dict[str, str] = field(default_factory=dict)
 
 
 class AidenAgent:
@@ -89,7 +89,7 @@ class AidenAgent:
             ],
             add_base_tools=False,
             verbosity_level=self.specialist_verbosity,
-            prompt_templates=get_prompt_templates("toolcalling_agent.yaml", "de_prompt_templates.yaml"),
+            prompt_templates=get_prompt_templates("toolcalling_agent.yaml", "data_engineer_prompt_templates.yaml"),
         )
 
         # Create solution planner agent - plans Data transformation approaches
@@ -148,7 +148,7 @@ class AidenAgent:
 
             return AidenGenerationResult(
                 transformation_source_code=transformation_code,
-                transformation_code_id=transformation_code_id,
+                solution_plan=result.get("solution_plan", ""),
                 metadata=metadata,
             )
         except Exception as e:

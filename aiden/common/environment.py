@@ -26,7 +26,7 @@ class Environment:
 
     type: str
     workdir: Optional[str] = None
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
     def __post_init__(self):
         """Validate the environment configuration."""
