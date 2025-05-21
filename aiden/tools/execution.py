@@ -7,9 +7,9 @@ ensuring that artifacts generated during the execution can be retrieved later in
 
 import logging
 import uuid
-from typing import Callable, Dict, List, Optional, Type
+from typing import Dict, List, Optional, Type
 
-from smolagents import tool
+from smolagents import Tool, tool
 
 from aiden.common.environment import Environment
 from aiden.common.registries.objects import ObjectRegistry
@@ -20,7 +20,7 @@ from aiden.models.execution.process_executor import ProcessExecutor
 logger = logging.getLogger(__name__)
 
 
-def get_executor_tool(distributed: bool = False, environment: Optional[Environment] = None) -> Callable:
+def get_executor_tool(distributed: bool = False, environment: Optional[Environment] = None) -> Tool:
     """Get the appropriate executor tool based on the distributed flag and environment.
 
     Args:
@@ -125,7 +125,7 @@ def get_executor_tool(distributed: bool = False, environment: Optional[Environme
     return execute_code
 
 
-def _get_executor_class(distributed: bool = False, environment: Environment = None) -> Type:
+def _get_executor_class(distributed: bool = False, environment: Environment | None = None) -> Type:
     """Get the appropriate executor class based on the distributed flag and environment.
 
     Args:
@@ -145,10 +145,9 @@ def _get_executor_class(distributed: bool = False, environment: Environment = No
         if distributed:
             try:
                 # Try to import Ray executor
-                from aiden.models.execution.ray_executor import RayExecutor
 
                 logger.debug("Using Ray for distributed execution")
-                return RayExecutor
+                return ProcessExecutor
             except ImportError:
                 # Fall back to process executor if Ray is not available
                 logger.warning("Ray not available, falling back to ProcessExecutor")
@@ -159,3 +158,5 @@ def _get_executor_class(distributed: bool = False, environment: Environment = No
             return ProcessExecutor
     elif env.type == "dagster":
         return ProcessExecutor
+    else:
+        raise ValueError(f"Unknown environment type: {env.type}")

@@ -5,15 +5,15 @@ from aiden.common.provider import ProviderConfig
 
 # Configure AI providers for each agent
 provider_config = ProviderConfig(
-    manager_provider="openai/gpt-4o",
-    data_expert_provider="openai/gpt-4o",
+    manager_provider="anthropic/claude-sonnet-4-20250514",
+    data_expert_provider="anthropic/claude-opus-4-20250514",
     data_engineer_provider="openai/gpt-4o",
-    tool_provider="anthropic/claude-3-7-sonnet-latest",
+    tool_provider="anthropic/claude-sonnet-4-20250514",
 )
 
 # Define input and output datasets
 sales_clients = Dataset(
-    path="./test_cases/input_data/sales_department/sales_clients.csv",
+    path="./tests/input_data/sales_department/sales_clients.csv",
     format="csv",
     schema={
         "ClientID": str,
@@ -27,7 +27,7 @@ sales_clients = Dataset(
     },
 )
 sales_employee_information = Dataset(
-    path="./test_cases/input_data/sales_department/sales_employee_information.csv",
+    path="./tests/input_data/sales_department/sales_employee_information.csv",
     format="csv",
     schema={
         "EmployeeID": str,
@@ -43,7 +43,7 @@ sales_employee_information = Dataset(
     },
 )
 sales_leads = Dataset(
-    path="./test_cases/input_data/sales_department/sales_leads.csv",
+    path="./tests/input_data/sales_department/sales_leads.csv",
     format="csv",
     schema={
         "LeadID": str,
@@ -56,12 +56,12 @@ sales_leads = Dataset(
     },
 )
 sales_performance = Dataset(
-    path="./test_cases/input_data/sales_department/sales_performance.csv",
+    path="./tests/input_data/sales_department/sales_performance.csv",
     format="csv",
     schema={"EmployeeID": str, "ReviewDate": str, "KPIs": str, "Score": float, "Comments": str},
 )
 sales_targets = Dataset(
-    path="./test_cases/input_data/sales_department/sales_targets.csv",
+    path="./tests/input_data/sales_department/sales_targets.csv",
     format="csv",
     schema={
         "EmployeeID": str,
@@ -73,7 +73,7 @@ sales_targets = Dataset(
     },
 )
 sales_training = Dataset(
-    path="./test_cases/input_data/sales_department/sales_training.csv",
+    path="./tests/input_data/sales_department/sales_training.csv",
     format="csv",
     schema={
         "SessionID": str,
@@ -85,7 +85,7 @@ sales_training = Dataset(
     },
 )
 sales_transactions = Dataset(
-    path="./test_cases/input_data/sales_department/sales_transactions.csv",
+    path="./tests/input_data/sales_department/sales_transactions.csv",
     format="csv",
     schema={
         "TransactionID": str,
@@ -98,7 +98,7 @@ sales_transactions = Dataset(
     },
 )
 out_dev_dataset = Dataset(
-    path="./test_cases/output_data/fact_sales_performance.csv",
+    path="./tests/output_data/fact_sales_performance.csv",
     format="csv",
     schema={
         "EmployeeID": str,
@@ -117,14 +117,21 @@ out_dev_dataset = Dataset(
 # Create environment object with custom workdir
 dev_env = Environment(
     type="local",
-    workdir="./test_cases/workdir/",
+    workdir="./tests/workdir/",
 )
 
 # Define transformation with natural language intent
 tr = Transformation(
     intent="""
-    based on all data you have i want you to calculate the performance of sales per month wich means calculate the total of sales and TotalLeads made per month
-    and calculate the lead conversion rate and the target achievement percentage and also calculate the sales achieved percentage        
+    Based on all data you have i want you to calculate the performance of sales per month per employee for all the year even if there is no sales, leads, conversion rate, target achievement percentage, sales achieved percentage for a month put it with 0. wich means:
+    - calculate the total of sales per month per employee
+    - calculate the total of leads made per month per employee
+    - calculate the lead conversion rate per month per employee
+    - calculate the target achievement percentage per month per employee
+    - calculate the sales achieved percentage per month per employee
+
+    Additional information on transformation output:
+    - Be careful to do the right transformation on `sales_targets` `Month` field. The month is in string ex: "May", "June", "July", etc.
     """,
     environment=dev_env,
 )

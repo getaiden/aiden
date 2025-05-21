@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional
 
 
 @dataclass
@@ -11,11 +11,12 @@ class ExecutionResult:
     Attributes:
         term_out (list[str]): The terminal output from the execution.
         exec_time (float): The time taken to execute the code.
+        exception (Exception): Any exception that occurred during execution.
     """
 
     term_out: list[str]
     exec_time: float
-    exception: Exception = field(default=None)
+    exception: Optional[Exception] = field(default=None)
 
 
 class Executor(ABC):

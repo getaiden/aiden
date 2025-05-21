@@ -190,7 +190,6 @@ cython_debug/
 # Working directory for model generation
 workdir/
 custom_workdir/
-emails.csv
 clean_emails.csv
 artifact.py
 .windsurf

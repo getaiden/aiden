@@ -8,7 +8,8 @@ import textwrap
 from typing import Optional, Type
 
 import litellm
-from litellm import completion, supports_response_schema
+from litellm import completion
+from litellm.utils import supports_response_schema
 from litellm.exceptions import RateLimitError, ServiceUnavailableError
 from pydantic import BaseModel
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -69,7 +70,7 @@ class Provider:
     Base class for LiteLLM provider.
     """
 
-    def __init__(self, model: str = None):
+    def __init__(self, model: str | None = None):
         default_model = "openai/gpt-4o-mini"
         self.model = model or default_model
         if "/" not in self.model:
@@ -94,7 +95,7 @@ class Provider:
         self,
         system_message: str,
         user_message: str,
-        response_format: Type[BaseModel] = None,
+        response_format: Type[BaseModel] | None = None,
         retries: int = 3,
         backoff: bool = True,
     ) -> str:
