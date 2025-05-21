@@ -45,7 +45,7 @@ tr.build(
     input_datasets=[products_dataset, sales_dataset],
     output_dataset=out_dev_dataset,
     provider=provider_config,
-    verbose=False,
+    verbose=True,
 )
 
 # Deploy the transformation

@@ -13,17 +13,17 @@ provider_config = ProviderConfig(
 
 # Define input and output datasets
 products_dataset = Dataset(
-    path="./test_cases/input_data/product_and_sales/product.csv",
+    path="./tests/input_data/product_and_sales/product.csv",
     format="csv",
     schema={"product_id": str, "name": str, "category": str, "price": int},
 )
 sales_dataset = Dataset(
-    path="./test_cases/input_data/product_and_sales/sales.csv",
+    path="./tests/input_data/product_and_sales/sales.csv",
     format="csv",
     schema={"sale_id": str, "product_id": str, "quantity": int, "sale_date": str},
 )
 out_dev_dataset = Dataset(
-    path="./test_cases/output_data/sales_revenue.csv",
+    path="./tests/output_data/sales_revenue.csv",
     format="csv",
     schema={"sale_id": str, "total_revenue": int},
 )
