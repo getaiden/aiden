@@ -13,12 +13,12 @@ provider_config = ProviderConfig(
 
 # Define input and output datasets
 in_dev_dataset = Dataset(
-    path="./examples/input_data/emails.csv",
+    path="./tests/input_data/emails.csv",
     format="csv",
     schema={"email": str},
 )
 out_dev_dataset = Dataset(
-    path="./examples/output_data/clean_emails.csv",
+    path="./tests/output_data/clean_emails.csv",
     format="csv",
     schema={"email": str},
 )
@@ -26,7 +26,7 @@ out_dev_dataset = Dataset(
 # Create environment object with custom workdir
 dev_env = Environment(
     type="local",
-    workdir="./examples/workdir/",
+    workdir="./tests/workdir/",
 )
 
 # Define transformation with natural language intent
@@ -40,8 +40,8 @@ tr.build(
     input_datasets=[in_dev_dataset],
     output_dataset=out_dev_dataset,
     provider=provider_config,
-    verbose=False,
+    verbose=True,
 )
 
 # Deploy the transformation
-tr.save("./tests/artifacts/email_transformation.py")
+tr.save("./tests/artifacts/emails_transformation.py")

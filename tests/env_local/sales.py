@@ -13,17 +13,17 @@ provider_config = ProviderConfig(
 
 # Define input and output datasets
 products_dataset = Dataset(
-    path="./examples/input_data/product_and_sales/product.csv",
+    path="./tests/input_data/product_and_sales/product.csv",
     format="csv",
     schema={"product_id": str, "name": str, "category": str, "price": int},
 )
 sales_dataset = Dataset(
-    path="./examples/input_data/product_and_sales/sales.csv",
+    path="./tests/input_data/product_and_sales/sales.csv",
     format="csv",
     schema={"sale_id": str, "product_id": str, "quantity": int, "sale_date": str},
 )
 out_dev_dataset = Dataset(
-    path="./examples/output_data/sales_revenue.csv",
+    path="./tests/output_data/sales_revenue.csv",
     format="csv",
     schema={"sale_id": str, "total_revenue": int},
 )
@@ -31,7 +31,7 @@ out_dev_dataset = Dataset(
 # Create environment object with custom workdir
 dev_env = Environment(
     type="local",
-    workdir="./examples/workdir/",
+    workdir="./tests/workdir/",
 )
 
 # Define transformation with natural language intent
@@ -45,8 +45,8 @@ tr.build(
     input_datasets=[products_dataset, sales_dataset],
     output_dataset=out_dev_dataset,
     provider=provider_config,
-    verbose=False,
+    verbose=True,
 )
 
 # Deploy the transformation
-tr.save("./tests/artifacts/sales_revenue.py")
+tr.save("./tests/artifacts/sales_revenue_transformation.py")

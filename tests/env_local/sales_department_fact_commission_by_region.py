@@ -13,7 +13,7 @@ provider_config = ProviderConfig(
 
 # Define input and output datasets
 sales_clients = Dataset(
-    path="./test_cases/input_data/sales_department/sales_clients.csv",
+    path="./tests/input_data/sales_department/sales_clients.csv",
     format="csv",
     schema={
         "ClientID": str,
@@ -27,7 +27,7 @@ sales_clients = Dataset(
     },
 )
 sales_employee_information = Dataset(
-    path="./test_cases/input_data/sales_department/sales_employee_information.csv",
+    path="./tests/input_data/sales_department/sales_employee_information.csv",
     format="csv",
     schema={
         "EmployeeID": str,
@@ -43,7 +43,7 @@ sales_employee_information = Dataset(
     },
 )
 sales_leads = Dataset(
-    path="./test_cases/input_data/sales_department/sales_leads.csv",
+    path="./tests/input_data/sales_department/sales_leads.csv",
     format="csv",
     schema={
         "LeadID": str,
@@ -56,12 +56,12 @@ sales_leads = Dataset(
     },
 )
 sales_performance = Dataset(
-    path="./test_cases/input_data/sales_department/sales_performance.csv",
+    path="./tests/input_data/sales_department/sales_performance.csv",
     format="csv",
     schema={"EmployeeID": str, "ReviewDate": str, "KPIs": str, "Score": float, "Comments": str},
 )
 sales_targets = Dataset(
-    path="./test_cases/input_data/sales_department/sales_targets.csv",
+    path="./tests/input_data/sales_department/sales_targets.csv",
     format="csv",
     schema={
         "EmployeeID": str,
@@ -73,7 +73,7 @@ sales_targets = Dataset(
     },
 )
 sales_training = Dataset(
-    path="./test_cases/input_data/sales_department/sales_training.csv",
+    path="./tests/input_data/sales_department/sales_training.csv",
     format="csv",
     schema={
         "SessionID": str,
@@ -85,7 +85,7 @@ sales_training = Dataset(
     },
 )
 sales_transactions = Dataset(
-    path="./test_cases/input_data/sales_department/sales_transactions.csv",
+    path="./tests/input_data/sales_department/sales_transactions.csv",
     format="csv",
     schema={
         "TransactionID": str,
@@ -98,35 +98,30 @@ sales_transactions = Dataset(
     },
 )
 out_dev_dataset = Dataset(
-    path="./test_cases/output_data/fact_sales_performance.csv",
+    path="./tests/output_data/fact_sales_commissions_by_region.csv",
     format="csv",
     schema={
-        "EmployeeID": str,
-        "Year": str,
+        "Region": str,
+        "Year": int,
         "Month": int,
         "TotalSales": float,
-        "TotalLeads": int,
-        "LeadsWon": int,
-        "LeadConversionRate": float,
-        "SalesTarget": float,
-        "SalesAchieved": float,
-        "TargetAchievementPct": float,
+        "TotalCommission": float,
+        "NumVendeurs": int,
     },
 )
 
 # Create environment object with custom workdir
-dagster_env = Environment(
-    type="dagster",
-    workdir="./test_cases/workdir/",
+dev_env = Environment(
+    type="local",
+    workdir="./tests/workdir/",
 )
 
 # Define transformation with natural language intent
 tr = Transformation(
     intent="""
-    based on all data you have i want you to calculate the performance of sales per month wich means calculate the total of sales and TotalLeads made per month
-    and calculate the lead conversion rate and the target achievement percentage and also calculate the sales achieved percentage        
+    I want you to calculate the total sales, total commission and number of vendors for each region per month even if no sales.
     """,
-    environment=dagster_env,
+    environment=dev_env,
 )
 
 # Build the transformation with specified datasets and providers
@@ -146,4 +141,4 @@ tr.build(
 )
 
 # Deploy the transformation
-tr.save("./tests/artifacts/dagster_sales_department.py")
+tr.save("./tests/artifacts/fact_sales_commissions_by_region_transformation.py")

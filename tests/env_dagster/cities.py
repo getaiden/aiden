@@ -13,12 +13,12 @@ provider_config = ProviderConfig(
 
 # Define input and output datasets
 in_dev_dataset = Dataset(
-    path="./test_cases/input_data/cities.csv",
+    path="./tests/input_data/cities.csv",
     format="csv",
     schema={"City": str, "Population": int, "GDP (USD)": int, "Area (sq mi)": int, "Median Household Income ($)": int, "County": str},
 )
 out_dev_dataset = Dataset(
-    path="./test_cases/output_data/cities_ranking.csv",
+    path="./tests/output_data/cities_ranking.csv",
     format="csv",
     schema={"City": str, "rank": int},
 )
@@ -26,7 +26,7 @@ out_dev_dataset = Dataset(
 # Create environment object with custom workdir
 dev_env = Environment(
     type="dagster",
-    workdir="./test_cases/workdir/",
+    workdir="./tests/workdir/",
 )
 
 # Define transformation with natural language intent
