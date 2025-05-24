@@ -6,16 +6,13 @@ import logging
 from dataclasses import dataclass, field
 from typing import Dict
 
-from smolagents import CodeAgent, LiteLLMModel, ToolCallingAgent
 
 from aiden.common.environment import Environment
 from aiden.common.registries.objects import ObjectRegistry
-from aiden.common.utils.prompt import get_prompt_templates
-from aiden.config import config
 from aiden.models.entities.code import Code
-from aiden.tools.execution import get_executor_tool
-from aiden.tools.response_formatting import format_final_de_agent_response, format_final_manager_agent_response
-from aiden.tools.transformation import get_fix_transformation_code, get_generate_transformation_code
+from aiden.agents.manager import ManagerAgent
+from aiden.agents.data_expert import DataExpertAgent
+from aiden.agents.data_engineer import DataEngineerAgent
 
 logger = logging.getLogger(__name__)
 
@@ -69,60 +66,26 @@ class AidenAgent:
         self.specialist_verbosity = 1 if verbose else 0
 
         # Create transformation coder agent - implements transformation code
-        self.data_engineer = ToolCallingAgent(
-            name="data_engineer",
-            description=(
-                "Data engineer that implements Data transformation code based on provided plan. "
-                "To work effectively, as part of the 'task' prompt the agent STRICTLY requires:"
-                "- the Data transformation task definition (i.e. 'intent' of the transformation)"
-                "- the full solution plan that outlines how to solve this problem given by the data_expert"
-                "- the input datasets (containe name, path, format, schema)"
-                "- the output dataset (containe name, path, format, schema)"
-                "- the working directory to use for transformation execution"
-            ),
-            model=LiteLLMModel(model_id=self.data_engineer_model_id),
-            tools=[
-                get_generate_transformation_code(llm_to_use=self.tool_model_id, environment=self.environment),
-                get_fix_transformation_code(llm_to_use=self.tool_model_id, environment=self.environment),
-                get_executor_tool(environment=self.environment),
-                format_final_de_agent_response,
-            ],
-            add_base_tools=False,
-            verbosity_level=self.specialist_verbosity,
-            prompt_templates=get_prompt_templates("toolcalling_agent.yaml", "data_engineer_prompt_templates.yaml"),
-        )
+        self.data_engineer = DataEngineerAgent(
+            model_id=self.data_engineer_model_id,
+            verbosity=self.specialist_verbosity,
+            environment=self.environment,
+            tool_model_id=self.tool_model_id,
+        ).agent
 
         # Create solution planner agent - plans Data transformation approaches
-        self.data_expert = ToolCallingAgent(
-            name="data_expert",
-            description=(
-                "Data expert that develops detailed solution ideas and plan for Data transformation use case. "
-                "To work effectively, as part of the 'task' prompt the agent STRICTLY requires:"
-                "- the Data transformation task definition (i.e. 'intent')"
-                "- the input datasets (containe name, path, format, schema)"
-                "- the output dataset (containe name, path, format, schema)"
-            ),
-            model=LiteLLMModel(model_id=self.data_expert_model_id),
-            tools=[],
-            add_base_tools=False,
-            verbosity_level=self.specialist_verbosity,
-            prompt_templates=get_prompt_templates("toolcalling_agent.yaml", "data_expert_prompt_templates.yaml"),
-        )
+        self.data_expert = DataExpertAgent(
+            model_id=self.data_expert_model_id,
+            verbosity=self.specialist_verbosity,
+        ).agent
 
-        # Create orchestrator agent - coordinates the workflow
-        self.manager_agent = CodeAgent(
-            model=LiteLLMModel(model_id=self.manager_model_id),
-            tools=[
-                format_final_manager_agent_response,
-            ],
-            managed_agents=[self.data_expert, self.data_engineer],
-            add_base_tools=False,
-            verbosity_level=self.manager_verbosity,
-            additional_authorized_imports=config.code_generation.authorized_agent_imports,
-            prompt_templates=get_prompt_templates("code_agent.yaml", "manager_prompt_templates.yaml"),
+        # Create manager agent - coordinates the workflow
+        self.manager_agent = ManagerAgent(
+            model_id=self.manager_model_id,
+            verbosity=self.manager_verbosity,
             max_steps=self.max_steps,
-            planning_interval=7,
-        )
+            managed_agents=[self.data_expert, self.data_engineer],
+        ).agent
 
     def run(self, task, additional_args: dict) -> AidenGenerationResult:
         """
