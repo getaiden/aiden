@@ -1,5 +1,5 @@
 """
-Module: ProcessExecutor for Isolated Python Code Execution
+Module: LocalExecutor for Isolated Python Code Execution
 
 This module provides an implementation of the `Executor` interface for executing Python code snippets
 in an isolated process. It captures stdout, stderr, exceptions, and stack traces, and enforces
@@ -7,10 +7,10 @@ timeout limits on execution.
 
 Classes:
     - RedirectQueue: A helper class to redirect stdout and stderr to a multiprocessing Queue.
-    - ProcessExecutor: A class to execute Python code snippets in an isolated process.
+    - LocalExecutor: A class to execute Python code snippets in an isolated process.
 
 Usage:
-    Create an instance of `ProcessExecutor`, providing the Python code, working directory, and timeout.
+    Create an instance of `LocalExecutor`, providing the Python code, working directory, and timeout.
     Call the `run` method to execute the code and return the results in an `ExecutionResult` object.
 
 Exceptions:
@@ -26,17 +26,17 @@ import time
 from pathlib import Path
 
 from aiden.config import config
-from aiden.models.execution.executor import ExecutionResult, Executor
+from aiden.executors.executor import ExecutionResult, Executor
 from aiden.common.environment import Environment
 
 logger = logging.getLogger(__name__)
 
 
-class ProcessExecutor(Executor):
+class LocalExecutor(Executor):
     """
     Execute Python code snippets in an isolated process.
 
-    The `ProcessExecutor` class implements the `Executor` interface, allowing Python code
+    The `LocalExecutor` class implements the `Executor` interface, allowing Python code
     snippets to be executed with strict isolation, output capture, and timeout enforcement.
     """
 
@@ -50,7 +50,7 @@ class ProcessExecutor(Executor):
         code_execution_file_name: str = config.execution.runfile_name,
     ):
         """
-        Initialize the ProcessExecutor.
+        Initialize the LocalExecutor.
 
         Args:
             execution_id (str): Unique identifier for this execution.
@@ -75,7 +75,7 @@ class ProcessExecutor(Executor):
 
     def run(self) -> ExecutionResult:
         """Execute code in a subprocess and return results."""
-        logger.debug(f"ProcessExecutor is executing code with working directory: {self.working_dir}")
+        logger.debug(f"LocalExecutor is executing code with working directory: {self.working_dir}")
         start_time = time.time()
 
         try:

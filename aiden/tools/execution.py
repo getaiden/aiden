@@ -12,10 +12,10 @@ from typing import Dict, List, Optional, Type
 from smolagents import Tool, tool
 
 from aiden.common.environment import Environment
-from aiden.common.registries.objects import ObjectRegistry
-from aiden.models.entities.code import Code
-from aiden.models.entities.node import Node
-from aiden.models.execution.process_executor import ProcessExecutor
+from aiden.registries.objects import ObjectRegistry
+from aiden.entities.code import Code
+from aiden.entities.node import Node
+from aiden.executors.local_executor import LocalExecutor
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,7 @@ def get_executor_tool(distributed: bool = False, environment: Optional[Environme
                 environment=env,
             )
 
-            # Execute and collect results - ProcessExecutor.run() handles cleanup internally
+            # Execute and collect results - LocalExecutor.run() handles cleanup internally
             logger.debug(f"Executing node {node} using executor {executor}")
             result = executor.run()
             logger.debug(f"Execution result: {result}")
@@ -147,16 +147,16 @@ def _get_executor_class(distributed: bool = False, environment: Environment | No
                 # Try to import Ray executor
 
                 logger.debug("Using Ray for distributed execution")
-                return ProcessExecutor
+                return LocalExecutor
             except ImportError:
                 # Fall back to process executor if Ray is not available
-                logger.warning("Ray not available, falling back to ProcessExecutor")
-                return ProcessExecutor
+                logger.warning("Ray not available, falling back to LocalExecutor")
+                return LocalExecutor
         else:
-            # Default to ProcessExecutor for non-distributed execution
-            logger.debug("Using ProcessExecutor (non-distributed)")
-            return ProcessExecutor
+            # Default to LocalExecutor for non-distributed execution
+            logger.debug("Using LocalExecutor (non-distributed)")
+            return LocalExecutor
     elif env.type == "dagster":
-        return ProcessExecutor
+        return LocalExecutor
     else:
         raise ValueError(f"Unknown environment type: {env.type}")

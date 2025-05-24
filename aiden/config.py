@@ -149,13 +149,13 @@ class _PromptTemplates:
         return template.render(**kwargs)
 
     def transformation_system(self) -> str:
-        return self._render("transformation/system_prompt.jinja")
+        return self._render("code_generator/system_prompt.jinja")
 
     def transformation_generate(
         self, problem_statement, plan, history, input_datasets, output_dataset, allowed_packages, environment_type
     ) -> str:
         return self._render(
-            "transformation/generate.jinja",
+            "code_generator/generate.jinja",
             problem_statement=problem_statement,
             plan=plan,
             history=history,
@@ -169,7 +169,7 @@ class _PromptTemplates:
         self, transformation_code, plan, review, problems, allowed_packages, environment_type
     ) -> str:
         return self._render(
-            "transformation/fix.jinja",
+            "code_generator/fix.jinja",
             transformation_code=transformation_code,
             plan=plan,
             review=review,
@@ -182,7 +182,7 @@ class _PromptTemplates:
         self, problem_statement, plan, transformation_code, problems, allowed_packages, environment_type
     ) -> str:
         return self._render(
-            "transformation/review.jinja",
+            "code_generator/review.jinja",
             problem_statement=problem_statement,
             plan=plan,
             transformation_code=transformation_code,

@@ -1,6 +1,6 @@
 from typing import Any
 
-from aiden.models.execution.executor import Executor, ExecutionResult
+from aiden.executors.executor import Executor, ExecutionResult
 
 
 class DockerExecutor(Executor):
