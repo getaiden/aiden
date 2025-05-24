@@ -44,4 +44,4 @@ tr.build(
 )
 
 # Deploy the transformation
-tr.save("./tests/artifacts/emails_transformation.py")
+tr.save("./tests/artifacts/email_transformation.py")
