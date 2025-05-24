@@ -15,7 +15,14 @@ provider_config = ProviderConfig(
 in_dev_dataset = Dataset(
     path="./tests/input_data/cities.csv",
     format="csv",
-    schema={"City": str, "Population": int, "GDP (USD)": int, "Area (sq mi)": int, "Median Household Income ($)": int, "County": str},
+    schema={
+        "City": str,
+        "Population": int,
+        "GDP (USD)": int,
+        "Area (sq mi)": int,
+        "Median Household Income ($)": int,
+        "County": str,
+    },
 )
 out_dev_dataset = Dataset(
     path="./tests/output_data/cities_ranking.csv",
@@ -44,4 +51,4 @@ tr.build(
 )
 
 # Deploy the transformation
-tr.save("./tests/artifacts/cities_ranking_transformation.py")
+tr.save("./tests/artifacts/cities_ranking.py")

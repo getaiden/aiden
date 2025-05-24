@@ -59,17 +59,3 @@ def format_final_de_agent_response(
         "execution_success": execution_success,
         "exception": exception,
     }
-
-
-@tool
-def format_final_mlops_agent_response(inference_code_id: str) -> dict:
-    """
-    Returns a dictionary containing the exact fields that the agent must return in its final response.
-
-    Args:
-        inference_code_id: The inference code id returned by the code validation tool after validating the inference code
-
-    Returns:
-        Dictionary containing the fields that must be returned by the agent in its final response
-    """
-    return {"python_inference_code": inference_code_id}

@@ -65,22 +65,22 @@ class Node:
 
     # Pre-execution contents: the solution plan and the generated code
     solution_plan: str
-    training_code: str = field(default=None, hash=True, kw_only=True)
-    inference_code: str = field(default=None, hash=True, kw_only=True)
-    training_tests: str = field(default=None, hash=True, kw_only=True)
-    inference_tests: str = field(default=None, hash=True, kw_only=True)
+    training_code: str | None = field(default=None, hash=True, kw_only=True)
+    inference_code: str | None = field(default=None, hash=True, kw_only=True)
+    training_tests: str | None = field(default=None, hash=True, kw_only=True)
+    inference_tests: str | None = field(default=None, hash=True, kw_only=True)
 
     # Pre-execution estimates of the node's value/cost, can be used to guide search
-    estimated_value: float = field(default=None, kw_only=True)
-    estimated_cost: float = field(default=None, kw_only=True)
+    estimated_value: float | None = field(default=None, kw_only=True)
+    estimated_cost: float | None = field(default=None, kw_only=True)
 
     # Post-execution results: model performance, execution time, exceptions, etc.
-    execution_time: float = field(default=None, kw_only=True)
+    execution_time: float | None = field(default=None, kw_only=True)
     execution_stdout: list[str] = field(default_factory=list, kw_only=True)
     exception_was_raised: bool = field(default=False, kw_only=True)
-    exception: Exception = field(default=None, kw_only=True)
+    exception: Exception | None = field(default=None, kw_only=True)
     model_artifacts: List[Path] = field(default_factory=list, kw_only=True)
-    analysis: str = field(default=None, kw_only=True)
+    analysis: str | None = field(default=None, kw_only=True)
 
     @property
     def is_terminal(self) -> bool:

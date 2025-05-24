@@ -1,6 +1,6 @@
 from typing import Any
 
-from plexe.internal.models.execution.executor import Executor, ExecutionResult
+from aiden.models.execution.executor import Executor, ExecutionResult
 
 
 class DockerExecutor(Executor):
