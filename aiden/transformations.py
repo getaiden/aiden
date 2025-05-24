@@ -10,11 +10,11 @@ from aiden.agents import AidenAgent
 from aiden.common.dataset import Dataset
 from aiden.common.environment import Environment, get_environment
 from aiden.common.provider import ProviderConfig
-from aiden.common.registries.objects import ObjectRegistry
+from aiden.registries.objects import ObjectRegistry
 from aiden.common.utils.transformation_state import TransformationState
 from aiden.common.utils.transformation_utils import format_code_snippet
 from aiden.config import prompt_templates
-from aiden.models.entities.description import CodeInfo, SchemaInfo, TransformationDescription
+from aiden.entities.description import CodeInfo, SchemaInfo, TransformationDescription
 
 # Define placeholders for classes that will be implemented later
 # This allows the code to type-check while maintaining the intended structure

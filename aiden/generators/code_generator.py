@@ -22,7 +22,7 @@ from pydantic import BaseModel
 from aiden.common.dataset import Dataset
 from aiden.common.environment import Environment
 from aiden.common.provider import Provider
-from aiden.common.registries.objects import ObjectRegistry
+from aiden.registries.objects import ObjectRegistry
 from aiden.common.utils.response import extract_code
 from aiden.config import config, prompt_templates
 

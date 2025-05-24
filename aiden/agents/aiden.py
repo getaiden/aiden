@@ -8,8 +8,8 @@ from typing import Dict
 
 
 from aiden.common.environment import Environment
-from aiden.common.registries.objects import ObjectRegistry
-from aiden.models.entities.code import Code
+from aiden.registries.objects import ObjectRegistry
+from aiden.entities.code import Code
 from aiden.agents.manager import ManagerAgent
 from aiden.agents.data_expert import DataExpertAgent
 from aiden.agents.data_engineer import DataEngineerAgent

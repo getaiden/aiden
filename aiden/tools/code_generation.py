@@ -5,7 +5,7 @@ from smolagents import Tool, tool
 
 from aiden.common.environment import Environment
 from aiden.common.provider import Provider
-from aiden.generation.transformation import TransformationCodeGenerator
+from aiden.generators import TransformationCodeGenerator
 
 logger = logging.getLogger(__name__)
 
