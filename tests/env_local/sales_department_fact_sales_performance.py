@@ -131,7 +131,7 @@ tr = Transformation(
     - calculate the sales achieved percentage per month per employee
 
     Additional information on transformation output:
-    - Be careful to do the right transformation on `sales_targets` `Month` field. The month is in string ex: "May", "June", "July", etc.
+    - i want you to put a string value in month column like may, june, july, etc.
     """,
     environment=dev_env,
 )
