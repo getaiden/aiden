@@ -1,14 +1,16 @@
-from aiden import Transformation
+from aiden import Transformation, config
 from aiden.common.dataset import Dataset
 from aiden.common.environment import Environment
 from aiden.common.provider import ProviderConfig
 
+config.configure_logging(level="DEBUG")
+
 # Configure AI providers for each agent
 provider_config = ProviderConfig(
-    manager_provider="openai/gpt-4o",
-    data_expert_provider="openai/gpt-4o",
+    manager_provider="anthropic/claude-sonnet-4-20250514",
+    data_expert_provider="anthropic/claude-opus-4-20250514",
     data_engineer_provider="openai/gpt-4o",
-    tool_provider="anthropic/claude-3-7-sonnet-latest",
+    tool_provider="anthropic/claude-sonnet-4-20250514",
 )
 
 # Define input and output datasets
@@ -40,7 +42,9 @@ tr.build(
     input_datasets=[in_dev_dataset],
     output_dataset=out_dev_dataset,
     provider=provider_config,
-    verbose=True,
+    verbose=False,
+    max_iterations=1,
+    timeout=10,
 )
 
 # Deploy the transformation

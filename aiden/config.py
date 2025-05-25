@@ -191,6 +191,12 @@ class _PromptTemplates:
             environment_type=environment_type,
         )
 
+    def cot_system(self) -> str:
+        return self._render("utils/system_prompt.jinja")
+
+    def cot_summarize(self, context: str) -> str:
+        return self._render("utils/cot_summarize.jinja", context=context)
+
     def agent_builder_prompt(
         self,
         intent: str,
