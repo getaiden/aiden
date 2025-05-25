@@ -15,6 +15,9 @@ from aiden.common.utils.transformation_state import TransformationState
 from aiden.common.utils.transformation_utils import format_code_snippet
 from aiden.config import prompt_templates
 from aiden.entities.description import CodeInfo, SchemaInfo, TransformationDescription
+from aiden.callbacks import Callback, ChainOfThoughtModelCallback, BuildStateInfo
+from aiden.common.utils.cot import ConsoleEmitter
+
 
 # Define placeholders for classes that will be implemented later
 # This allows the code to type-check while maintaining the intended structure
@@ -92,9 +95,33 @@ class Transformation:
         output_dataset: "Dataset",
         provider: str | ProviderConfig = "openai/gpt-4o",
         verbose: bool = False,
+        timeout: int = None,
+        max_iterations: int = None,
+        callbacks: List[Callback] = None,
+        chain_of_thought: bool = True,
     ) -> None:
+
+        # Ensure timeout, max_iterations, and run_timeout make sense
+        if timeout is None and max_iterations is None:
+            raise ValueError("At least one of 'timeout' or 'max_iterations' must be set")
+
         # Ensure the object registry is cleared before building
         self.object_registry.clear()
+
+        # Initialize callbacks list if not provided
+        callbacks = callbacks or []
+
+        # Add chain of thought callback if requested
+        cot_callable = None
+        if chain_of_thought:
+            cot_model_callback = ChainOfThoughtModelCallback(emitter=ConsoleEmitter())
+            callbacks.append(cot_model_callback)
+
+            # Get the underlying callback for use with agents
+            cot_callable = cot_model_callback.get_chain_of_thought_callable()
+
+        # Register all callbacks in the object registry
+        self.object_registry.register_multiple(Callback, {f"{i}": c for i, c in enumerate(callbacks)})
 
         try:
             # Convert string provider to config if needed
@@ -115,6 +142,34 @@ class Transformation:
                 self.object_registry.register(Dataset, input_dataset.name, input_dataset)
             self.object_registry.register(Dataset, output_dataset.name, output_dataset)
 
+            # Run callbacks for build start
+            for callback in self.object_registry.get_all(Callback).values():
+                try:
+                    # Note: callbacks still receive the actual dataset objects for backward compatibility
+                    callback.on_build_start(
+                        BuildStateInfo(
+                            intent=self.intent,
+                            provider=provider_config.tool_provider,  # Use tool_provider for callbacks
+                            max_iterations=max_iterations,
+                            timeout=timeout,
+                            input_datasets=[
+                                self.object_registry.get(Dataset, input_dataset.name)
+                                for input_dataset in self.input_datasets
+                            ],
+                            output_dataset=self.object_registry.get(Dataset, self.output_dataset.name),
+                        )
+                    )
+                except Exception as e:
+                    # Log full stack trace at debug level
+                    import traceback
+
+                    logger.debug(
+                        f"Error in callback {callback.__class__.__name__}.on_build_start: {e}\n{traceback.format_exc()}"
+                    )
+
+                    # Log a shorter message at warning level
+                    logger.warning(f"Error in callback {callback.__class__.__name__}.on_build_start: {str(e)[:50]}")
+
             # Step 2: generate transformation
             # Start the transformation generation run
             agent_prompt = prompt_templates.agent_builder_prompt(
@@ -132,6 +187,7 @@ class Transformation:
                 environment=self.environment,
                 max_steps=30,
                 verbose=verbose,
+                chain_of_thought_callable=cot_callable,
             )
             generated = agent.run(
                 agent_prompt,
@@ -142,6 +198,34 @@ class Transformation:
                     "output_dataset_name": output_dataset.name,
                 },
             )
+
+            # Run callbacks for build start
+            for callback in self.object_registry.get_all(Callback).values():
+                try:
+                    # Note: callbacks still receive the actual dataset objects for backward compatibility
+                    callback.on_build_end(
+                        BuildStateInfo(
+                            intent=self.intent,
+                            provider=provider_config.tool_provider,  # Use tool_provider for callbacks
+                            max_iterations=max_iterations,
+                            timeout=timeout,
+                            input_datasets=[
+                                self.object_registry.get(Dataset, input_dataset.name)
+                                for input_dataset in self.input_datasets
+                            ],
+                            output_dataset=self.object_registry.get(Dataset, self.output_dataset.name),
+                        )
+                    )
+                except Exception as e:
+                    # Log full stack trace at debug level
+                    import traceback
+
+                    logger.debug(
+                        f"Error in callback {callback.__class__.__name__}.on_build_end: {e}\n{traceback.format_exc()}"
+                    )
+
+                    # Log a shorter message at warning level
+                    logger.warning(f"Error in callback {callback.__class__.__name__}.on_build_end: {str(e)[:50]}")
 
             # Step 4: update model state and attributes
             self.transformer_source = generated.transformation_source_code

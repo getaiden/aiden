@@ -15,7 +15,9 @@ from aiden.common.environment import Environment
 from aiden.registries.objects import ObjectRegistry
 from aiden.entities.code import Code
 from aiden.entities.node import Node
+from aiden.common.dataset import Dataset
 from aiden.executors.local_executor import LocalExecutor
+from aiden.callbacks import BuildStateInfo, Callback
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +38,8 @@ def get_executor_tool(distributed: bool = False, environment: Optional[Environme
         node_id: str,
         code: str,
         working_dir: str,
-        dataset_names: List[str],
+        input_dataset_names: List[str],
+        output_dataset_name: str,
         timeout: int,
     ) -> Dict:
         """Executes code in an isolated environment.
@@ -45,7 +48,8 @@ def get_executor_tool(distributed: bool = False, environment: Optional[Environme
             node_id: Unique identifier for this execution
             code: The code to execute
             working_dir: Directory to use for execution
-            dataset_names: List of dataset names to retrieve from the registry
+            input_dataset_names: List of dataset names to retrieve from the registry
+            output_dataset_name: Name of the dataset to create
             timeout: Maximum execution time in seconds
 
         Returns:
@@ -64,11 +68,27 @@ def get_executor_tool(distributed: bool = False, environment: Optional[Environme
 
         execution_id = f"{node_id}-{uuid.uuid4()}"
         try:
+            # Get actual datasets from registry
+            input_datasets = object_registry.get_multiple(Dataset, input_dataset_names)
+            output_dataset = object_registry.get(Dataset, output_dataset_name)
             # Create a node to store execution results
             node = Node(solution_plan="")  # We only need this for execute_node
 
             # Get callbacks from the registry and notify them
             node.training_code = code
+
+            # Create state info once for all callbacks
+            state_info = BuildStateInfo(
+                intent="Unknown",  # Will be filled by agent context
+                provider="Unknown",  # Will be filled by agent context
+                input_datasets=[v for _, v in input_datasets.items()],
+                output_dataset=output_dataset,
+                iteration=0,  # Default value, no longer used for MLFlow run naming
+                node=node,
+            )
+
+            # Notify all callbacks about execution start
+            _notify_callbacks(object_registry.get_all(Callback), "start", state_info)
 
             # Import here to avoid circular imports
             from aiden.config import config
@@ -97,6 +117,10 @@ def get_executor_tool(distributed: bool = False, environment: Optional[Environme
             node.exception = result.exception or None
 
             node.training_code = code
+
+            # Notify callbacks about the execution end with the same state_info
+            # The node reference in state_info automatically reflects the updates to node
+            _notify_callbacks(object_registry.get_all(Callback), "end", state_info)
 
             # Check if the execution failed in any way
             if node.exception is not None:
@@ -160,3 +184,27 @@ def _get_executor_class(distributed: bool = False, environment: Environment | No
         return LocalExecutor
     else:
         raise ValueError(f"Unknown environment type: {env.type}")
+
+
+def _notify_callbacks(callbacks: Dict, event_type: str, build_state_info) -> None:
+    """Helper function to notify callbacks with consistent error handling.
+
+    Args:
+        callbacks: Dictionary of callbacks from the registry
+        event_type: The event type - either "start" or "end"
+        build_state_info: The state info to pass to callbacks
+    """
+    method_name = f"on_iteration_{event_type}"
+
+    for callback in callbacks.values():
+        try:
+            getattr(callback, method_name)(build_state_info)
+        except Exception as e:
+            # Log full stack trace at debug level
+            import traceback
+
+            logger.debug(
+                f"Error in callback {callback.__class__.__name__}.{method_name}: {e}\n{traceback.format_exc()}"
+            )
+            # Log a shorter message at warning level
+            logger.warning(f"Error in callback {callback.__class__.__name__}.{method_name}: {str(e)[:50]}")

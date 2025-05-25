@@ -4,8 +4,7 @@ This module defines a multi-agent ML engineering system for building machine lea
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict
-
+from typing import Dict, Optional, Callable
 
 from aiden.common.environment import Environment
 from aiden.registries.objects import ObjectRegistry
@@ -41,6 +40,7 @@ class AidenAgent:
         environment: Environment = None,
         max_steps: int = 30,
         verbose: bool = False,
+        chain_of_thought_callable: Optional[Callable] = None,
     ):
         """
         Initialize the multi-agent ML engineering system.
@@ -52,6 +52,7 @@ class AidenAgent:
             tool_model_id: Model ID for the model used inside tool calls
             max_steps: Maximum number of steps for the manager agent
             verbose: Whether to display detailed agent logs
+            chain_of_thought_callable: Callable to use for chain of thought output
         """
         self.manager_model_id = manager_model_id
         self.data_expert_model_id = data_expert_model_id
@@ -60,6 +61,7 @@ class AidenAgent:
         self.environment = environment
         self.max_steps = max_steps
         self.verbose = verbose
+        self.chain_of_thought_callable = chain_of_thought_callable
 
         # Set verbosity levels
         self.manager_verbosity = 2 if verbose else 0
@@ -71,12 +73,14 @@ class AidenAgent:
             verbosity=self.specialist_verbosity,
             environment=self.environment,
             tool_model_id=self.tool_model_id,
+            chain_of_thought_callable=self.chain_of_thought_callable,
         ).agent
 
         # Create solution planner agent - plans Data transformation approaches
         self.data_expert = DataExpertAgent(
             model_id=self.data_expert_model_id,
             verbosity=self.specialist_verbosity,
+            chain_of_thought_callable=self.chain_of_thought_callable,
         ).agent
 
         # Create manager agent - coordinates the workflow
@@ -85,6 +89,7 @@ class AidenAgent:
             verbosity=self.manager_verbosity,
             max_steps=self.max_steps,
             managed_agents=[self.data_expert, self.data_engineer],
+            chain_of_thought_callable=self.chain_of_thought_callable,
         ).agent
 
     def run(self, task, additional_args: dict) -> AidenGenerationResult:

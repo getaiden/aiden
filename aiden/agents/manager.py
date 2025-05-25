@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, Callable
 from smolagents import CodeAgent, LiteLLMModel, MultiStepAgent
 from aiden.tools.response_formatting import format_final_manager_agent_response
 from aiden.config import config
@@ -12,9 +12,11 @@ class ManagerAgent:
         verbosity: int = 2,
         max_steps: int = 30,
         managed_agents: List[MultiStepAgent] = None,
+        chain_of_thought_callable: Optional[Callable] = None,
     ) -> None:
 
         self.agent = CodeAgent(
+            name="manager",
             model=LiteLLMModel(model_id=model_id),
             tools=[
                 format_final_manager_agent_response,
@@ -26,4 +28,5 @@ class ManagerAgent:
             prompt_templates=get_prompt_templates("code_agent.yaml", "manager_prompt_templates.yaml"),
             max_steps=max_steps,
             planning_interval=7,
+            step_callbacks=[chain_of_thought_callable],
         )
