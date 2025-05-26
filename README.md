@@ -4,7 +4,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/aiden-ai.svg)](https://pypi.org/project/aiden-ai/)
 [![Python Version](https://img.shields.io/pypi/pyversions/aiden-ai.svg)](https://pypi.org/project/aiden-ai/)
-[![License](https://img.shields.io/github/license/getaiden/aiden.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/getaiden/aiden.svg)](LICENSE.md)
 
 **An agentic framework for building data transformations from natural language**
 
@@ -21,30 +21,37 @@
   - [Environment Types](#environment-types)
   - [Provider Configuration](#provider-configuration)
   - [Dataset Definitions](#dataset-definitions)
-  - [Deployment](#deployment)
+  - [Save result artifact](#save-result-artifact)
 - [Examples](#examples)
-- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Community](#community)
-- [Roadmap](#roadmap)
 - [License](#license)
 
 ## 🔍 Overview
 
-Aiden is a Python framework that enables you to build data transformations using natural language. It leverages a multi-agent AI architecture to simplify data engineering tasks, making them more accessible and efficient. With Aiden, you can describe your data transformation requirements in plain English, and the framework will generate the necessary code to implement them.
+Aiden is a Python framework that enables you to build data transformations using natural language. It leverages a multi-agent AI architecture to simplify data engineering tasks, making them more accessible and efficient. With Aiden, you can describe your data transformation requirements in plain text, and the framework will generate the necessary code to implement them.
 
 ## 💻 Installation
 
-### Using pip
+### Using pip or poetry
 
 ```bash
 pip install aiden-ai
+# or with poetry
+poetry add aiden-ai
 ```
 
-### Using Poetry
+### SET environment variables
+The environment variables are used to configure the AI providers.
+We use litellm to manage the providers. You can find the list of supported providers [here](https://github.com/BerriAI/litellm/blob/main/.env.example).
 
 ```bash
-poetry add aiden-ai
+export OPENAI_API_KEY="your-openai-api-key"
+# or
+export ANTHROPIC_API_KEY="your-anthropic-api-key"
+# or
+export GEMINI_API_KEY="your-google-api-key"
+# or ...
 ```
 
 ### Optional Dependencies
@@ -54,21 +61,21 @@ For Dagster integration:
 ```bash
 pip install aiden-ai[dagster]
 # or with poetry
-poetry install --extras dagster
+poetry add 'aiden-ai[dagster]'
 ```
 
 ### Development Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/getaiden/aiden.git
+git clone https://github.com/getaiden/aiden-ai.git
 cd aiden
 
 # Install dependencies with Poetry
 poetry install
 
 # Activate the virtual environment
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate
 ```
 
 ## 🚀 Quick Start
@@ -110,18 +117,30 @@ transformation.save("./email_cleaner.py")
 
 Aiden supports multiple execution environments:
 
-- **Local Environment**: For development and testing
+The `workdir` is the directory where Aiden will store temporary files.
+
+- **Local Environment**: Will generate a python artifact that can be executed locally.
   ```python
   from aiden.common.environment import Environment
   
   local_env = Environment(type="local", workdir="./local_workdir/")
+
+  transformation = Transformation(
+    intent="Clean the 'email' column and remove invalid entries",
+    environment=local_env,
+  )
   ```
 
-- **Dagster Environment**: For production-grade data orchestration
+- **Dagster Environment**: Will generate a python dagster artifact that can be executed in a dagster environment.
   ```python
   dagster_env = Environment(
       type="dagster",
       workdir="./dagster_workdir/"
+  )
+
+  transformation = Transformation(
+    intent="Clean the 'email' column and remove invalid entries",
+    environment=dagster_env,
   )
   ```
 
@@ -138,11 +157,21 @@ provider_config = ProviderConfig(
     data_engineer_provider="openai/gpt-4o",
     tool_provider="anthropic/claude-3-7-sonnet-latest",
 )
+
+transformation = Transformation(
+    intent="Clean the 'email' column and remove invalid entries",
+)
+transformation.build(
+    input_datasets=[input_data],
+    output_dataset=output_data,
+    provider=provider_config,
+    verbose=True,
+)
 ```
 
 ### Dataset Definitions
 
-Explicitly define input and output datasets with schemas for validation and transformation:
+Explicitly define input and output datasets with schema for transformation:
 
 ```python
 from aiden.common.dataset import Dataset
@@ -154,7 +183,7 @@ dataset = Dataset(
 )
 ```
 
-### Deployment
+### Save result artifact
 
 Save transformations as standalone Python files that can be executed in various environments:
 
@@ -164,7 +193,7 @@ transformation.save("./artifact.py")
 
 #### Testing Artifacts
 
-Once you've saved your transformation, you can test it in different environments:
+Once you've saved your transformation, you can test it in the environment you built with:
 
 - **Local Environment**:
   ```bash
@@ -234,11 +263,7 @@ tr.build(
 tr.save("./artifact.py")
 ```
 
-Check out the [examples](./examples) directory for more use cases.
-
-## 📚 Documentation
-
-For detailed documentation, visit our [documentation site](https://docs.getaiden.ai) or check the [docs](./docs) directory in this repository.
+Check out the [examples](./tests) directory for more use cases.
 
 ## 🤝 Contributing
 
@@ -247,22 +272,14 @@ We welcome contributions to Aiden! Here's how you can help:
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes
-4. Run tests: `poetry run pytest`
+4. Run tests: `poetry run pytest tests/unit`
 5. Commit your changes: `git commit -m 'Add amazing feature'`
 6. Push to the branch: `git push origin feature/amazing-feature`
 7. Open a Pull Request
 
-Please see our [Contributing Guide](CONTRIBUTING.md) for more details.
-
 ## 👥 Community
 
 - [Discord](https://discord.gg/getaiden)
-- [Twitter](https://twitter.com/getaiden)
-- [GitHub Discussions](https://github.com/getaiden/aiden/discussions)
-
-## 🗺️ Roadmap
-
-See our [public roadmap](https://github.com/getaiden/aiden/projects) to learn about upcoming features and improvements.
 
 ## 📄 License
 
