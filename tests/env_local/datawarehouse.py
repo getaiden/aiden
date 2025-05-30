@@ -97,7 +97,7 @@ sales_transactions = Dataset(
         "Status": str,
     },
 )
-out_dev_dataset = Dataset(
+fact_sales_performance = Dataset(
     path="./tests/output_data/fact_sales_performance.csv",
     format="csv",
     schema={
@@ -114,14 +114,64 @@ out_dev_dataset = Dataset(
     },
 )
 
-# Create environment object with custom workdir
+fact_lead_status = Dataset(
+    path="./tests/output_data/fact_lead_status.csv",
+    format="csv",
+    schema={
+        "EmployeeID": str,
+        "Year": int,
+        "Month": int,
+        "TotalLeads": int,
+        "LeadsWon": int,
+        "LeadsLost": int,
+        "ConversionRate": float,
+    },
+)
+
+fact_sales_commissions = Dataset(
+    path="./tests/output_data/fact_sales_commissions.csv",
+    format="csv",
+    schema={
+        "EmployeeID": str,
+        "Year": int,
+        "Month": int,
+        "TotalSales": float,
+        "CommissionRate": float,
+        "CommissionEarned": float,
+    },
+)
+
+dim_employee = Dataset(
+    path="./tests/output_data/dim_employee.csv",
+    format="csv",
+    schema={
+        "EmployeeID": str,
+        "FullName": str,
+        "JobTitle": str,
+        "Region": str,
+        "ManagerID": str,
+        "HireDate": str,
+        "Status": str,
+    },
+)
+
+input_datasets = [
+    sales_clients,
+    sales_employee_information,
+    sales_leads,
+    sales_performance,
+    sales_targets,
+    sales_training,
+    sales_transactions,
+]
+
 dev_env = Environment(
-    type="local",
+    type="dagster",
     workdir="./tests/workdir/",
 )
 
 # Define transformation with natural language intent
-tr = Transformation(
+fact_sales_performance_transformation = Transformation(
     intent="""
     ## Based on all data you have i want you to calculate the performance of sales per month per employee for all the year even if there is no sales, leads, conversion rate, target achievement percentage, sales achieved percentage for a month put it with 0. wich means:
     - calculate the total of sales per month per employee
@@ -142,21 +192,56 @@ tr = Transformation(
     environment=dev_env,
 )
 
-# Build the transformation with specified datasets and providers
-tr.build(
-    input_datasets=[
-        sales_clients,
-        sales_employee_information,
-        sales_leads,
-        sales_performance,
-        sales_targets,
-        sales_training,
-        sales_transactions,
-    ],
-    output_dataset=out_dev_dataset,
+fact_lead_status_transformation = Transformation(
+    intent="""
+    based on all data you have calculate the total leads, the number of leads won, the number of leads lost and the conversion rate for each employee per month even for the months where there is no leads.
+    """,
+    environment=dev_env,
+)
+
+fact_sales_commissions_transformation = Transformation(
+    intent="""
+    based on all data you have calculate the commission earned by each employee per month, even for the months where there is no sales.
+    """,
+    environment=dev_env,
+)
+
+dim_employee_transformation = Transformation(
+    intent="""
+    based on all data you have create a dimension table for employees
+    """,
+    environment=dev_env,
+)
+
+fact_sales_performance_transformation.build(
+    input_datasets=input_datasets,
+    output_dataset=fact_sales_performance,
     provider=provider_config,
     verbose=True,
 )
 
-# Deploy the transformation
-tr.save("./tests/artifacts/fact_sales_performance_transformation.py")
+fact_lead_status_transformation.build(
+    input_datasets=input_datasets,
+    output_dataset=fact_lead_status,
+    provider=provider_config,
+    verbose=True,
+)
+
+fact_sales_commissions_transformation.build(
+    input_datasets=input_datasets,
+    output_dataset=fact_sales_commissions,
+    provider=provider_config,
+    verbose=True,
+)
+
+dim_employee_transformation.build(
+    input_datasets=input_datasets,
+    output_dataset=dim_employee,
+    provider=provider_config,
+    verbose=True,
+)
+
+fact_sales_performance_transformation.save("./tests/artifacts/fact_sales_performance_transformation.py")
+fact_lead_status_transformation.save("./tests/artifacts/fact_lead_status_transformation.py")
+fact_sales_commissions_transformation.save("./tests/artifacts/fact_sales_commissions_transformation.py")
+dim_employee_transformation.save("./tests/artifacts/dim_employee_transformation.py")
