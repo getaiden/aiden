@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aiden-ai"
-version = "0.1.1"
+version = "0.2.0"
 description = "An agentic framework for building Data transformations from natural language"
 authors = ["hamza sefiane <h.sefiane7@gmail.com>"]
 license = "Apache-2.0"
