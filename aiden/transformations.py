@@ -95,15 +95,9 @@ class Transformation:
         output_dataset: "Dataset",
         provider: str | ProviderConfig = "openai/gpt-4o",
         verbose: bool = False,
-        timeout: int = None,
-        max_iterations: int = None,
         callbacks: List[Callback] = None,
         chain_of_thought: bool = True,
     ) -> None:
-
-        # Ensure timeout, max_iterations, and run_timeout make sense
-        if timeout is None and max_iterations is None:
-            raise ValueError("At least one of 'timeout' or 'max_iterations' must be set")
 
         # Ensure the object registry is cleared before building
         self.object_registry.clear()
@@ -150,8 +144,6 @@ class Transformation:
                         BuildStateInfo(
                             intent=self.intent,
                             provider=provider_config.tool_provider,  # Use tool_provider for callbacks
-                            max_iterations=max_iterations,
-                            timeout=timeout,
                             input_datasets=[
                                 self.object_registry.get(Dataset, input_dataset.name)
                                 for input_dataset in self.input_datasets
@@ -207,8 +199,6 @@ class Transformation:
                         BuildStateInfo(
                             intent=self.intent,
                             provider=provider_config.tool_provider,  # Use tool_provider for callbacks
-                            max_iterations=max_iterations,
-                            timeout=timeout,
                             input_datasets=[
                                 self.object_registry.get(Dataset, input_dataset.name)
                                 for input_dataset in self.input_datasets

@@ -43,8 +43,6 @@ tr.build(
     output_dataset=out_dev_dataset,
     provider=provider_config,
     verbose=False,
-    max_iterations=1,
-    timeout=10,
 )
 
 # Deploy the transformation
