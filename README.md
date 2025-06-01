@@ -31,6 +31,8 @@
 
 Aiden is a Python framework that enables you to build data transformations using natural language. It leverages a multi-agent AI architecture to simplify data engineering tasks, making them more accessible and efficient. With Aiden, you can describe your data transformation requirements in plain text, and the framework will generate the necessary code to implement them.
 
+The technical design of Aiden was inspired by the [Plexe project](https://github.com/plexe-ai/plexe), a data science agent library to buil and deploy ML models using natural language.
+
 ## 💻 Installation
 
 ### Using pip or poetry
