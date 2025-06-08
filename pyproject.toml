@@ -48,6 +48,7 @@ smolagents = "^1.15.0"
 click = "^8.1.7"
 dagster = { version = "^1.10.15", optional = true }
 dagster-webserver = { version = "^1.10.15", optional = true }
+psycopg2-binary = "^2.9.10"
 
 [tool.poetry.extras]
 dagster = ["dagster", "dagster-webserver"]

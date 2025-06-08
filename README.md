@@ -178,10 +178,20 @@ Explicitly define input and output datasets with schema for transformation:
 ```python
 from aiden.common.dataset import Dataset
 
+# File-based dataset
 dataset = Dataset(
     path="./data.csv",
     format="csv",
     schema={"column1": str, "column2": int}
+)
+
+# PostgreSQL dataset
+from aiden.common.dataset import create_postgresql_dataset
+
+pg_dataset = create_postgresql_dataset(
+    connection_string="postgresql://username:password@host:5432/database_name",
+    table="customers",
+    dataset_schema={"id": int, "name": str, "email": str}
 )
 ```
 

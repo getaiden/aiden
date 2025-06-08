@@ -56,6 +56,7 @@ class _Config:
                 "joblib",
                 "mlxtend",
                 "pyarrow",
+                "psycopg2",
             ]
         )
 

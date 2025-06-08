@@ -2,8 +2,9 @@
 This module provides utility functions for manipulating Pydantic models.
 """
 
+from typing import Dict, List, Type
+
 from pydantic import BaseModel, create_model
-from typing import Type, List
 
 
 def merge_models(model_name: str, models: List[Type[BaseModel]]) -> Type[BaseModel]:
@@ -35,4 +36,91 @@ def create_model_from_fields(model_name: str, model_fields: dict) -> Type[BaseMo
     return create_model(model_name, **model_fields)
 
 
-# Functions map_to_basemodel, format_schema, and convert_schema_to_type_dict have been moved to the Dataset class
+def map_to_basemodel(name: str, schema: dict | Type[BaseModel]) -> Type[BaseModel]:
+    """
+    Ensure that the schema is a Pydantic model or a dictionary, and return the model.
+
+    :param name: the name to be given to the model class
+    :param schema: the schema to be converted to a Pydantic model
+    :return: the Pydantic model
+    """
+    # Pydantic model: return as is
+    if isinstance(schema, type) and issubclass(schema, BaseModel):
+        return schema
+
+    # Dictionary: convert to Pydantic model, if possible
+    if isinstance(schema, dict):
+        try:
+            # Handle both Dict[str, type] and Dict[str, str] formats
+            annotated_schema = {}
+
+            for k, v in schema.items():
+                # If v is a string like "int", convert it to the actual type
+                if isinstance(v, str):
+                    type_mapping = {
+                        "int": int,
+                        "float": float,
+                        "str": str,
+                        "bool": bool,
+                        "list": list,
+                        "dict": dict,
+                    }
+                    if v in type_mapping:
+                        annotated_schema[k] = (type_mapping[v], ...)
+                    else:
+                        raise ValueError(f"Invalid type specification: {v} for field {k}")
+                # If v is already a type, use it directly
+                elif isinstance(v, type):
+                    annotated_schema[k] = (v, ...)
+                else:
+                    raise ValueError(f"Invalid field specification for {k}: {v}")
+
+            # Create a model class with the given name
+            model_class = create_model(name, **annotated_schema)
+            return model_class
+        except Exception as e:
+            raise ValueError(f"Invalid schema definition: {e}")
+
+    # All other schema types are invalid
+    raise TypeError("Schema must be a Pydantic model or a dictionary of field names to types.")
+
+
+def format_schema(schema) -> Dict[str, str]:
+    """
+    Format a schema model into a dictionary representation of field names and types.
+
+    :param schema: A pydantic model defining a schema or a schema instance
+    :return: A dictionary representing the schema structure with field names as keys and types as values
+    """
+    if schema is None:
+        return {}
+
+    # If schema is a class (type) and a subclass of BaseModel
+    if isinstance(schema, type) and issubclass(schema, BaseModel):
+        result = {}
+        # Use model_fields which is the recommended approach in newer Pydantic versions
+        for field_name, field_info in schema.model_fields.items():
+            field_type = getattr(field_info.annotation, "__name__", str(field_info.annotation))
+            result[field_name] = field_type
+        return result
+
+    # If schema is an instance of BaseModel
+    elif isinstance(schema, BaseModel):
+        result = {}
+        # Use model_fields which is the recommended approach in newer Pydantic versions
+        for field_name, field_info in schema.__class__.model_fields.items():
+            field_type = getattr(field_info.annotation, "__name__", str(field_info.annotation))
+            result[field_name] = field_type
+        return result
+
+    # If schema is a dictionary (original schema passed to constructor)
+    elif isinstance(schema, dict):
+        result = {}
+        for field_name, field_type in schema.items():
+            if isinstance(field_type, type):
+                result[field_name] = field_type.__name__
+            else:
+                result[field_name] = str(field_type)
+        return result
+
+    return {}
