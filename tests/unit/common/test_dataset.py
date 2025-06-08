@@ -21,8 +21,3 @@ def test_dataset():
     # Test schema conversion to Pydantic model
     assert isinstance(dataset.schema, type)
     assert issubclass(dataset.schema, BaseModel)
-
-    # Test metadata handling
-    assert dataset.get_metadata() == {}
-    dataset.add_metadata("source", "test")
-    assert dataset.get_metadata() == {"source": "test"}

@@ -13,6 +13,7 @@ from aiden.common.provider import ProviderConfig
 from aiden.registries.objects import ObjectRegistry
 from aiden.common.utils.transformation_state import TransformationState
 from aiden.common.utils.transformation_utils import format_code_snippet
+from aiden.common.utils.pydantic_utils import format_schema
 from aiden.config import prompt_templates
 from aiden.entities.description import CodeInfo, SchemaInfo, TransformationDescription
 from aiden.callbacks import Callback, ChainOfThoughtModelCallback, BuildStateInfo
@@ -278,11 +279,11 @@ class Transformation:
         input_schemas_dict = {}
         for dataset in self.input_datasets:
             if dataset.schema:
-                input_schemas_dict[dataset.name] = Dataset.format_schema(dataset.schema)
+                input_schemas_dict[dataset.name] = format_schema(dataset.schema)
 
         schemas = SchemaInfo(
             inputs=input_schemas_dict,
-            output=Dataset.format_schema(self.output_dataset.schema),
+            output=format_schema(self.output_dataset.schema),
         )
 
         # Create code info
